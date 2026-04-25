@@ -1,0 +1,87 @@
+type SubmitRaceInput = 
+ record {
+   carType: CarType;
+   coinsCollected: nat;
+   distanceTravelled: nat;
+   mapTheme: MapTheme;
+   mode: GameMode;
+   score: nat;
+ };
+type PowerUpType = 
+ variant {
+   COIN_MAGNET;
+   DOUBLE_COINS;
+   FUEL_PACK;
+   INVINCIBILITY;
+   SHIELD;
+   SPEED_BOOST;
+   TIME_SLOW;
+ };
+type PlayerProfilePublic = 
+ record {
+   coins: nat;
+   highScore: nat;
+   playerId: principal;
+   powerUpLevels: vec record {
+                        PowerUpType;
+                        nat;
+                      };
+   selectedCar: CarType;
+   totalRaces: nat;
+   unlockedCars: vec CarType;
+   xp: nat;
+ };
+type MapTheme = 
+ variant {
+   CANYON;
+   CITY;
+   HIGHWAY;
+ };
+type LeaderboardEntry = 
+ record {
+   carType: CarType;
+   playerId: principal;
+   rank: nat;
+   score: nat;
+   timestamp: int;
+ };
+type GameMode = 
+ variant {
+   SCORE;
+   TIMED;
+ };
+type CarType = 
+ variant {
+   BASIC;
+   HYPER;
+   JET;
+   LIGHTNING;
+   RACE;
+   SPORT;
+   STREET;
+ };
+type CarStats = 
+ record {
+   acceleration: nat;
+   handling: nat;
+   speed: nat;
+ };
+type CarInfo = 
+ record {
+   carType: CarType;
+   stats: CarStats;
+   unlockCost: nat;
+ };
+service : {
+  getCarCatalog: () -> (vec CarInfo) query;
+  getLeaderboard: () -> (vec LeaderboardEntry) query;
+  getOrCreateProfile: () -> (PlayerProfilePublic);
+  getProfile: () -> (opt PlayerProfilePublic) query;
+  getTopScores: () -> (vec LeaderboardEntry) query;
+  getTotalPlayers: () -> (nat) query;
+  getTotalRaces: () -> (nat) query;
+  selectCar: (carType: CarType) -> (bool);
+  submitRaceResult: (input: SubmitRaceInput) -> (PlayerProfilePublic);
+  unlockCar: (carType: CarType) -> (bool);
+  upgradePowerUp: (ptype: PowerUpType) -> (bool);
+}

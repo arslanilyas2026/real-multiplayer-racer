@@ -1,0 +1,245 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-display: "Space Grotesk", sans-serif;
+    --font-body: "Plus Jakarta Sans", sans-serif;
+    --font-mono: "JetBrains Mono", monospace;
+    --radius: 1.25rem;
+
+    --background: 0.15 0.15 300;
+    --foreground: 0.95 0.02 300;
+    --card: 0.22 0.12 300;
+    --card-foreground: 0.95 0.02 300;
+    --popover: 0.22 0.12 300;
+    --popover-foreground: 0.95 0.02 300;
+
+    --primary: 0.6 0.2 30;
+    --primary-foreground: 0.15 0.15 300;
+
+    --secondary: 0.65 0.2 175;
+    --secondary-foreground: 0.15 0.15 300;
+    --muted: 0.35 0.08 300;
+    --muted-foreground: 0.7 0.05 300;
+
+    --accent: 0.8 0.15 90;
+    --accent-foreground: 0.15 0.15 300;
+
+    --destructive: 0.55 0.22 25;
+    --destructive-foreground: 0.95 0.02 300;
+
+    --border: 0.28 0.1 300;
+    --input: 0.28 0.1 300;
+    --ring: 0.65 0.2 175;
+
+    --chart-1: 0.6 0.2 30;
+    --chart-2: 0.65 0.2 175;
+    --chart-3: 0.8 0.15 90;
+    --chart-4: 0.7 0.18 45;
+    --chart-5: 0.75 0.22 120;
+
+    --sidebar: 0.15 0.15 300;
+    --sidebar-foreground: 0.95 0.02 300;
+    --sidebar-primary: 0.6 0.2 30;
+    --sidebar-primary-foreground: 0.15 0.15 300;
+    --sidebar-accent: 0.65 0.2 175;
+    --sidebar-accent-foreground: 0.15 0.15 300;
+    --sidebar-border: 0.28 0.1 300;
+    --sidebar-ring: 0.65 0.2 175;
+  }
+
+  .dark {
+    --background: 0.12 0.18 300;
+    --foreground: 0.95 0.02 300;
+    --card: 0.18 0.14 300;
+    --card-foreground: 0.95 0.02 300;
+    --popover: 0.22 0.14 300;
+    --popover-foreground: 0.95 0.02 300;
+
+    --primary: 0.65 0.22 30;
+    --primary-foreground: 0.12 0.18 300;
+
+    --secondary: 0.68 0.22 175;
+    --secondary-foreground: 0.12 0.18 300;
+    --muted: 0.25 0.1 300;
+    --muted-foreground: 0.65 0.06 300;
+
+    --accent: 0.82 0.18 90;
+    --accent-foreground: 0.12 0.18 300;
+
+    --destructive: 0.6 0.24 25;
+    --destructive-foreground: 0.95 0.02 300;
+
+    --border: 0.3 0.12 300;
+    --input: 0.3 0.12 300;
+    --ring: 0.68 0.22 175;
+
+    --chart-1: 0.65 0.22 30;
+    --chart-2: 0.68 0.22 175;
+    --chart-3: 0.82 0.18 90;
+    --chart-4: 0.72 0.2 45;
+    --chart-5: 0.78 0.24 120;
+
+    --sidebar: 0.12 0.18 300;
+    --sidebar-foreground: 0.95 0.02 300;
+    --sidebar-primary: 0.65 0.22 30;
+    --sidebar-primary-foreground: 0.12 0.18 300;
+    --sidebar-accent: 0.68 0.22 175;
+    --sidebar-accent-foreground: 0.12 0.18 300;
+    --sidebar-border: 0.3 0.12 300;
+    --sidebar-ring: 0.68 0.22 175;
+  }
+
+  *,
+  *::before,
+  *::after {
+    @apply border-border;
+  }
+  html,
+  body,
+  #root {
+    border: none !important;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+    overflow: hidden;
+  }
+}
+
+@font-face {
+  font-family: "Space Grotesk";
+  src: url("/assets/fonts/SpaceGrotesk.woff2") format("woff2");
+  font-weight: 400 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("/assets/fonts/PlusJakartaSans.woff2") format("woff2");
+  font-weight: 400 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("/assets/fonts/JetBrainsMono.woff2") format("woff2");
+  font-weight: 400 700;
+  font-display: swap;
+}
+
+@layer utilities {
+  .transition-smooth {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .glow-primary {
+    box-shadow: 0 0 16px oklch(var(--primary) / 0.6), 0 0 32px
+      oklch(var(--primary) / 0.3);
+  }
+
+  .glow-secondary {
+    box-shadow: 0 0 16px oklch(var(--secondary) / 0.6), 0 0 32px
+      oklch(var(--secondary) / 0.3);
+  }
+
+  .glow-accent {
+    box-shadow: 0 0 16px oklch(var(--accent) / 0.6), 0 0 32px
+      oklch(var(--accent) / 0.3);
+  }
+
+  .neon-border-primary {
+    border: 2px solid oklch(var(--primary));
+    box-shadow: inset 0 0 12px oklch(var(--primary) / 0.2);
+  }
+
+  .neon-border-secondary {
+    border: 2px solid oklch(var(--secondary));
+    box-shadow: inset 0 0 12px oklch(var(--secondary) / 0.2);
+  }
+
+  .arcade-button {
+    @apply px-4 py-2 font-display font-bold rounded-lg transition-smooth;
+  }
+
+  /* Tubik-style diagonal stripe depth overlay */
+  .bg-stripe-overlay {
+    position: relative;
+  }
+  .bg-stripe-overlay::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.05) 0px,
+      rgba(255, 255, 255, 0.05) 2px,
+      transparent 2px,
+      transparent 28px
+    );
+    z-index: 0;
+  }
+
+  /* Win burst starburst — used behind YOU WIN! text */
+  .burst-rays {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: conic-gradient(
+      from 0deg,
+      transparent 0deg,
+      rgba(255, 215, 0, 0.12) 10deg,
+      transparent 20deg,
+      transparent 40deg,
+      rgba(255, 107, 43, 0.1) 50deg,
+      transparent 60deg,
+      transparent 80deg,
+      rgba(255, 215, 0, 0.12) 90deg,
+      transparent 100deg,
+      transparent 120deg,
+      rgba(255, 107, 43, 0.1) 130deg,
+      transparent 140deg,
+      transparent 160deg,
+      rgba(255, 215, 0, 0.12) 170deg,
+      transparent 180deg,
+      transparent 200deg,
+      rgba(255, 107, 43, 0.1) 210deg,
+      transparent 220deg,
+      transparent 240deg,
+      rgba(255, 215, 0, 0.12) 250deg,
+      transparent 260deg,
+      transparent 280deg,
+      rgba(255, 107, 43, 0.1) 290deg,
+      transparent 300deg,
+      transparent 320deg,
+      rgba(255, 215, 0, 0.12) 330deg,
+      transparent 340deg,
+      transparent 360deg
+    );
+    border-radius: 50%;
+    animation: burst-spin 16s linear infinite;
+  }
+
+  @keyframes burst-spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}
+
+/* Game-specific color tokens */
+:root {
+  --color-bg: #0d1b2a;
+  --color-primary: #ff6b2b;
+  --color-secondary: #00d4aa;
+  --color-coin: #ffd700;
+  --color-road: #1e2d40;
+  --color-neon-purple: #b44fff;
+}

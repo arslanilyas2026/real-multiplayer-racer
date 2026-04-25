@@ -1,0 +1,59 @@
+// Version: 1.0.0
+type CarType__256726780 =
+  {#BASIC; #HYPER; #JET; #LIGHTNING; #RACE; #SPORT; #STREET};
+type Data__791452850<K, V> =
+  {var count : Nat__490723111; kvs : [var ?(K, V)]};
+type GameMode__934614494 = {#SCORE; #TIMED};
+type Internal__8484328<K, V> =
+  {children : [var ?Node__46230540<K, V>]; data : Data__791452850<K, V>};
+type Leaf__809889148<K, V> = {data : Data__791452850<K, V>};
+type MapTheme__682726928 = {#CANYON; #CITY; #HIGHWAY};
+type Nat__490723111 = Nat__920180692;
+type Nat__920180692 = Nat;
+type Node__46230540<K, V> =
+  {#internal : Internal__8484328<K, V>; #leaf : Leaf__809889148<K, V>};
+type PlayerProfile__244392411 =
+  {
+    var coins : Nat;
+    var highScore : Nat;
+    playerId : Principal;
+    var powerUpLevels : [(PowerUpType__447717853, Nat)];
+    var selectedCar : CarType__256726780;
+    var totalRaces : Nat;
+    var unlockedCars : [CarType__256726780];
+    var xp : Nat
+  };
+type PowerUpType__447717853 =
+  {
+    #COIN_MAGNET;
+    #DOUBLE_COINS;
+    #FUEL_PACK;
+    #INVINCIBILITY;
+    #SHIELD;
+    #SPEED_BOOST;
+    #TIME_SLOW
+  };
+type RaceResult__805794747 =
+  {
+    carType : CarType__256726780;
+    coinsCollected : Nat;
+    distanceTravelled : Nat;
+    mapTheme : MapTheme__682726928;
+    mode : GameMode__934614494;
+    playerId : Principal;
+    score : Nat;
+    timestamp : Int
+  };
+actor {
+  stable profiles :
+    {
+      var root : Node__46230540<Principal, PlayerProfile__244392411>;
+      var size : Nat__490723111
+    };
+  stable raceScores :
+    {
+      var blockIndex : Nat__490723111;
+      var blocks : [var [var ?RaceResult__805794747]];
+      var elementIndex : Nat__490723111
+    }
+};

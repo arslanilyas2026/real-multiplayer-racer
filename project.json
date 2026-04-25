@@ -1,0 +1,23 @@
+{
+  "overview": "Real Multiplayer Racer is a top-down 2D arcade racing game. Race on neon-lit roads, dodge traffic, collect coins and power-ups, and climb the leaderboard — single-player first, with multiplayer coming soon.",
+  "features": [
+    "10-screen full game flow: Splash, Menu, Car Selection, Game Mode, Upgrades, Gameplay, Crash, Results, Leaderboard, Challenges",
+    "7 car types with unique stats and 4 color options each",
+    "3 map themes: Highway, City, and Canyon",
+    "Score Mode (endless) and Timed Mode (1/3/5/10 min)",
+    "Tap/swipe lane controls, dodge traffic, collect coins and fuel",
+    "7 collectible power-ups with upgrade system",
+    "Dark neon visual style with rainbow glow trails and animated HUD"
+  ],
+  "category": "games",
+  "tags": [
+    "racing",
+    "arcade",
+    "mobile",
+    "neon",
+    "top-down",
+    "single-player",
+    "2d"
+  ],
+  "last_updated": "2026-04-24T19:13:51.482Z"
+}
