@@ -261,11 +261,11 @@ export default function SplashScreen() {
               letterSpacing: "0.04em",
             }}
           >
-            REAL
+            LANE RACER:
             <br />
-            MULTIPLAYER
+            CAR RACING
             <br />
-            RACER
+            CLASH
           </h1>
         </div>
 

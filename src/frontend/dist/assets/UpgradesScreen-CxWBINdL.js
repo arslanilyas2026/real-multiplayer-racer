@@ -1,6 +1,6 @@
-import { u as useNavigate, j as jsxRuntimeExports } from "./index-C9nsfCGx.js";
-import { P as POWER_UP_CATALOG } from "./powerups-gDkT3A0P.js";
-import { u as useGameStore } from "./gameStore-5oklP8TG.js";
+import { u as useNavigate, j as jsxRuntimeExports } from "./index-B6JfqekL.js";
+import { P as POWER_UP_CATALOG } from "./powerups-Ccl822wB.js";
+import { u as useGameStore } from "./gameStore-sCxKMV8R.js";
 const MAX_LEVEL = 5;
 function PowerUpCard({ type }) {
   const { profile, spendCoins, upgradePowerUp } = useGameStore();

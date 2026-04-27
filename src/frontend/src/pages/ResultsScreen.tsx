@@ -17,6 +17,7 @@ const CAR_EMOJI: Record<CarType, string> = {
   [CarType.STREET]: "🚙",
   [CarType.JET]: "✈️",
   [CarType.RACE]: "🏁",
+  [CarType.SUPER]: "🚀",
   [CarType.HYPER]: "⚡",
   [CarType.LIGHTNING]: "🌩️",
 };
@@ -637,8 +638,8 @@ export default function ResultsScreen() {
             onClick={() => {
               if (navigator.share) {
                 navigator.share({
-                  title: "Real Multiplayer Racer",
-                  text: `I scored ${score.toLocaleString()} pts in Real Multiplayer Racer! 🏎️🔥`,
+                  title: "Lane Racer: Car Racing Clash",
+                  text: `I scored ${score.toLocaleString()} pts in Lane Racer: Car Racing Clash! 🏎️🔥`,
                 });
               }
             }}

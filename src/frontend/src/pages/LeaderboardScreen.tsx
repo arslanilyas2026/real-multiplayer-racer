@@ -8,6 +8,19 @@ import {
 } from "../lib/api";
 import { useGameStore } from "../store/gameStore";
 
+// ── XP level system ───────────────────────────────────────────────────────────
+const XP_LEVEL_THRESHOLDS = [0, 1000, 2000, 3500, 5000, 7000, 9500, 12500];
+
+const CAR_UNLOCK_AT_LEVEL: Record<number, string> = {
+  2: "SPORT",
+  3: "STREET",
+  4: "JET",
+  5: "RACE",
+  6: "SUPER",
+  7: "HYPER",
+  8: "LIGHTNING",
+};
+
 // ── Rank title badge by score ─────────────────────────────────────────────────
 function getRankTitle(score: number): {
   label: string;
@@ -32,22 +45,22 @@ const TOP3_META: Record<
 > = {
   1: {
     gradient: "linear-gradient(135deg, #FFD700, #FFA500)",
-    glow: "0 0 18px #FFD70066",
+    glow: "0 0 14px #FFD70066",
     textColor: "#0D1B2A",
   },
   2: {
     gradient: "linear-gradient(135deg, #C0C0C0, #9e9e9e)",
-    glow: "0 0 14px #C0C0C044",
+    glow: "0 0 10px #C0C0C044",
     textColor: "#0D1B2A",
   },
   3: {
     gradient: "linear-gradient(135deg, #CD7F32, #a0522d)",
-    glow: "0 0 14px #CD7F3244",
+    glow: "0 0 10px #CD7F3244",
     textColor: "#ffffff",
   },
 };
 
-// ── Score row ─────────────────────────────────────────────────────────────────
+// ── Compact score row ─────────────────────────────────────────────────────────
 function ScoreRow({
   entry,
   index,
@@ -63,7 +76,6 @@ function ScoreRow({
   const scoreNum = Number(entry.score);
   const rankTitle = getRankTitle(scoreNum);
 
-  // Avatar color from car type hash
   const avatarColors = [
     "#FF6B2B",
     "#00D4AA",
@@ -79,7 +91,7 @@ function ScoreRow({
   return (
     <div
       data-ocid={`leaderboard.item.${index + 1}`}
-      className="flex items-center gap-3 px-4 py-3 rounded-2xl border transition-smooth"
+      className="flex items-center gap-2 px-3 py-2 rounded-xl border transition-smooth"
       style={{
         background: isPlayer
           ? "linear-gradient(90deg, #FF6B2B22, #FFD70014)"
@@ -94,26 +106,26 @@ function ScoreRow({
         boxShadow: isTop3
           ? top3Meta.glow
           : isPlayer
-            ? "0 0 16px #FF6B2B22"
+            ? "0 0 12px #FF6B2B22"
             : "none",
       }}
     >
       {/* Rank badge */}
       {isTop3 ? (
         <div
-          className="w-10 h-10 flex items-center justify-center rounded-full font-display font-black text-base flex-shrink-0"
+          className="w-8 h-8 flex items-center justify-center rounded-full font-display font-black flex-shrink-0"
           style={{
             background: top3Meta.gradient,
             boxShadow: top3Meta.glow,
             color: top3Meta.textColor,
-            fontSize: "1.2rem",
+            fontSize: "1rem",
           }}
         >
           {rank === 1 ? "🥇" : rank === 2 ? "🥈" : "🥉"}
         </div>
       ) : (
         <div
-          className="w-10 h-10 flex items-center justify-center rounded-xl font-display font-black text-sm flex-shrink-0"
+          className="w-8 h-8 flex items-center justify-center rounded-lg font-display font-black text-xs flex-shrink-0"
           style={{
             background: isPlayer ? "#FF6B2B22" : "#1e2d40",
             color: isPlayer ? "#FF6B2B" : "#556678",
@@ -126,7 +138,7 @@ function ScoreRow({
 
       {/* Avatar circle */}
       <div
-        className="w-8 h-8 rounded-full flex items-center justify-center font-display font-black text-sm flex-shrink-0"
+        className="w-7 h-7 rounded-full flex items-center justify-center font-display font-black text-xs flex-shrink-0"
         style={{
           background: `${avatarColor}33`,
           border: `1px solid ${avatarColor}66`,
@@ -136,32 +148,34 @@ function ScoreRow({
         {entry.playerName.charAt(0).toUpperCase()}
       </div>
 
-      {/* Name + car + rank title */}
+      {/* Name + rank title */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-1.5">
           <p
-            className="font-display font-bold text-sm truncate"
+            className="font-display font-bold text-xs truncate"
             style={{ color: isTop3 ? "#ffffff" : "#ccddee" }}
           >
             {entry.playerName.length > 12
               ? `${entry.playerName.slice(0, 12)}…`
               : entry.playerName}
           </p>
-          {/* Rank title badge */}
           <span
-            className="text-xs font-display font-bold px-2 py-0.5 rounded-full flex-shrink-0"
+            className="font-display font-bold px-1.5 py-0.5 rounded-full flex-shrink-0"
             style={{
               background: rankTitle.bg,
               color: rankTitle.color,
               border: `1px solid ${rankTitle.color}44`,
-              fontSize: "0.6rem",
-              letterSpacing: "0.05em",
+              fontSize: "0.5rem",
+              letterSpacing: "0.04em",
             }}
           >
             {rankTitle.label}
           </span>
         </div>
-        <p className="text-xs font-mono" style={{ color: "#445566" }}>
+        <p
+          className="font-mono"
+          style={{ color: "#445566", fontSize: "0.6rem" }}
+        >
           {entry.carType}
         </p>
       </div>
@@ -169,7 +183,7 @@ function ScoreRow({
       {/* Score */}
       <div className="text-right flex-shrink-0">
         <p
-          className="font-display font-black text-base"
+          className="font-display font-black text-sm"
           style={{
             color: isTop3
               ? TOP3_META[rank].textColor === "#0D1B2A"
@@ -180,15 +194,13 @@ function ScoreRow({
         >
           {scoreNum.toLocaleString()}
         </p>
-        <p className="text-xs" style={{ color: "#445566" }}>
-          pts
-        </p>
+        <p style={{ color: "#445566", fontSize: "0.6rem" }}>pts</p>
       </div>
     </div>
   );
 }
 
-// ── Pinned player row ─────────────────────────────────────────────────────────
+// ── Compact pinned player row ─────────────────────────────────────────────────
 function PinnedPlayerRow({
   playerName,
   playerScore,
@@ -204,38 +216,38 @@ function PinnedPlayerRow({
 
   return (
     <div
-      className="px-4 pt-2 pb-4 border-t"
+      className="px-4 pt-2 pb-3 border-t"
       style={{ borderColor: "#1e2d40", background: "#0D1B2A" }}
     >
       <p
-        className="text-xs font-display font-bold tracking-widest uppercase mb-2"
-        style={{ color: "#FF6B2B88" }}
+        className="font-display font-bold tracking-widest uppercase mb-1.5"
+        style={{ color: "#FF6B2B88", fontSize: "0.6rem" }}
       >
         YOUR RANK
       </p>
       <div
-        className="flex items-center gap-3 px-4 py-3 rounded-2xl border"
+        className="flex items-center gap-2 px-3 py-2 rounded-xl border"
         style={{
           background: "linear-gradient(90deg, #FF6B2B22, #FFD70014)",
           borderColor: "#FF6B2B55",
-          boxShadow: "0 0 20px #FF6B2B22",
+          boxShadow: "0 0 16px #FF6B2B22",
         }}
         data-ocid="leaderboard.pinned_player_row"
       >
         {/* Rank badge */}
         <div
-          className="w-10 h-10 flex items-center justify-center rounded-xl font-display font-black text-sm flex-shrink-0"
+          className="w-8 h-8 flex items-center justify-center rounded-xl font-display font-black text-xs flex-shrink-0"
           style={{
             background: "linear-gradient(135deg, #FF6B2B, #FFD700)",
             color: "#0D1B2A",
-            boxShadow: "0 0 10px #FF6B2B66",
+            boxShadow: "0 0 8px #FF6B2B66",
           }}
         >
           {playerRank ? `#${playerRank}` : "?"}
         </div>
         {/* Avatar */}
         <div
-          className="w-8 h-8 rounded-full flex items-center justify-center font-display font-black text-sm flex-shrink-0"
+          className="w-7 h-7 rounded-full flex items-center justify-center font-display font-black text-xs flex-shrink-0"
           style={{
             background: "#FF6B2B33",
             border: "1px solid #FF6B2B66",
@@ -246,33 +258,36 @@ function PinnedPlayerRow({
         </div>
         {/* Name + title */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <p
-              className="font-display font-bold text-sm truncate"
+              className="font-display font-bold text-xs truncate"
               style={{ color: "#ffffff" }}
             >
               {playerName || "YOU"}
             </p>
             <span
-              className="text-xs font-display font-bold px-2 py-0.5 rounded-full flex-shrink-0"
+              className="font-display font-bold px-1.5 py-0.5 rounded-full flex-shrink-0"
               style={{
                 background: rankTitle.bg,
                 color: rankTitle.color,
                 border: `1px solid ${rankTitle.color}44`,
-                fontSize: "0.6rem",
+                fontSize: "0.5rem",
               }}
             >
               {rankTitle.label}
             </span>
           </div>
-          <p className="text-xs font-mono" style={{ color: "#667788" }}>
+          <p
+            className="font-mono"
+            style={{ color: "#667788", fontSize: "0.6rem" }}
+          >
             {playerCar}
           </p>
         </div>
         {/* Score + invite */}
         <div className="flex flex-col items-end gap-1 flex-shrink-0">
           <p
-            className="font-display font-black text-base"
+            className="font-display font-black text-sm"
             style={{ color: "#FF6B2B" }}
           >
             {playerScore.toLocaleString()}
@@ -280,23 +295,24 @@ function PinnedPlayerRow({
           <button
             type="button"
             data-ocid="leaderboard.invite_button"
-            className="text-xs font-display font-bold px-2 py-0.5 rounded-lg border transition-smooth"
+            className="font-display font-bold px-2 py-0.5 rounded-lg border transition-smooth"
             style={{
               borderColor: "#00D4AA66",
               color: "#00D4AA",
               background: "#00D4AA11",
+              fontSize: "0.55rem",
               letterSpacing: "0.03em",
             }}
             onClick={() => {
               if (navigator.share) {
                 navigator.share({
-                  title: "Real Multiplayer Racer",
-                  text: `Challenge me in Real Multiplayer Racer! I'm ranked #${playerRank ?? "?"} 🏎️`,
+                  title: "Lane Racer: Car Racing Clash",
+                  text: `Challenge me in Lane Racer: Car Racing Clash! I'm ranked #${playerRank ?? "?"} 🏎️`,
                 });
               }
             }}
           >
-            INVITE TO PLAY
+            INVITE
           </button>
         </div>
       </div>
@@ -329,9 +345,21 @@ export default function LeaderboardScreen() {
     load();
   }, []);
 
-  // Find the player's rank in the leaderboard (match by "YOU" placeholder)
   const playerEntry = entries.find((e) => e.playerName === "YOU");
   const playerRank = playerEntry ? Number(playerEntry.rank) : null;
+
+  // ── XP calculation ──────────────────────────────────────────────────────────
+  const currentLevel = profile.level;
+  const currentXp = profile.xp;
+  const currentLevelStart = XP_LEVEL_THRESHOLDS[currentLevel - 1] ?? 0;
+  const nextLevelStart =
+    XP_LEVEL_THRESHOLDS[currentLevel] ??
+    XP_LEVEL_THRESHOLDS[XP_LEVEL_THRESHOLDS.length - 1];
+  const xpIntoLevel = currentXp - currentLevelStart;
+  const xpNeededForLevel = nextLevelStart - currentLevelStart;
+  const xpPct = Math.min(100, (xpIntoLevel / xpNeededForLevel) * 100);
+  const nextCarUnlock = CAR_UNLOCK_AT_LEVEL[currentLevel + 1] ?? null;
+  const isMaxLevel = currentLevel >= 8;
 
   const statItems = [
     {
@@ -353,12 +381,6 @@ export default function LeaderboardScreen() {
       color: "#FFD700",
     },
     {
-      label: "Level",
-      value: `LVL ${profile.level}`,
-      icon: "⭐",
-      color: "#B44FFF",
-    },
-    {
       label: "Current Car",
       value: profile.selectedCar,
       icon: "🚗",
@@ -377,7 +399,7 @@ export default function LeaderboardScreen() {
       color: "#00D4AA",
     },
     {
-      label: "Total Races (Global)",
+      label: "Global Races",
       value: totalRaces.toLocaleString(),
       icon: "🏁",
       color: "#FF6B2B",
@@ -392,26 +414,26 @@ export default function LeaderboardScreen() {
     >
       {/* Header */}
       <div
-        className="flex items-center justify-between px-5 py-4 border-b flex-shrink-0"
+        className="flex items-center justify-between px-4 py-3 border-b flex-shrink-0"
         style={{ background: "#111d2e", borderColor: "#1e2d40" }}
       >
         <button
           type="button"
           data-ocid="leaderboard.back_button"
           onClick={() => navigate({ to: "/menu" })}
-          className="w-10 h-10 flex items-center justify-center rounded-xl font-bold text-lg transition-smooth"
+          className="w-9 h-9 flex items-center justify-center rounded-xl font-bold text-lg transition-smooth"
           style={{ color: "#7a9bb5" }}
           aria-label="Back"
         >
           ←
         </button>
         <h1
-          className="font-display font-black text-lg tracking-widest uppercase"
-          style={{ color: "#FFD700", textShadow: "0 0 16px #FFD70066" }}
+          className="font-display font-black text-base tracking-widest uppercase"
+          style={{ color: "#FFD700", textShadow: "0 0 12px #FFD70066" }}
         >
           🏆 LEADERBOARD
         </h1>
-        <div className="w-10" />
+        <div className="w-9" />
       </div>
 
       {/* Tabs */}
@@ -425,36 +447,36 @@ export default function LeaderboardScreen() {
             type="button"
             data-ocid={`leaderboard.${t}_tab`}
             onClick={() => setTab(t)}
-            className="flex-1 py-3 font-display font-bold text-sm tracking-widest uppercase relative transition-smooth"
+            className="flex-1 py-2.5 font-display font-bold text-xs tracking-widest uppercase relative transition-smooth"
             style={{ color: tab === t ? "#00D4AA" : "#556678" }}
           >
             {t === "scores" ? "HIGH SCORES" : "MY STATS"}
             {tab === t && (
               <span
                 className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full"
-                style={{ background: "#00D4AA", boxShadow: "0 0 8px #00D4AA" }}
+                style={{ background: "#00D4AA", boxShadow: "0 0 6px #00D4AA" }}
               />
             )}
           </button>
         ))}
       </div>
 
-      {/* Tab content — scrollable, leaves room for pinned row */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 min-h-0">
+      {/* Tab content */}
+      <div className="flex-1 overflow-y-auto px-3 py-3 min-h-0">
         {tab === "scores" && (
           <div
             data-ocid="leaderboard.scores_list"
-            className="flex flex-col gap-2"
+            className="flex flex-col gap-1.5"
           >
             {loading ? (
               <div
                 data-ocid="leaderboard.loading_state"
-                className="flex flex-col gap-2"
+                className="flex flex-col gap-1.5"
               >
                 {Array.from({ length: 5 }).map((_, i) => (
                   <div
                     key={`skel-${i + 1}`}
-                    className="h-16 rounded-2xl animate-pulse"
+                    className="h-12 rounded-xl animate-pulse"
                     style={{ background: "#1e2d40" }}
                   />
                 ))}
@@ -462,9 +484,9 @@ export default function LeaderboardScreen() {
             ) : entries.length === 0 ? (
               <div
                 data-ocid="leaderboard.empty_state"
-                className="flex flex-col items-center gap-4 py-16"
+                className="flex flex-col items-center gap-4 py-12"
               >
-                <span className="text-5xl">🏁</span>
+                <span className="text-4xl">🏁</span>
                 <p className="text-muted-foreground font-body text-center text-sm">
                   No races recorded yet.
                   <br />
@@ -489,6 +511,148 @@ export default function LeaderboardScreen() {
             data-ocid="leaderboard.stats_panel"
             className="flex flex-col gap-3"
           >
+            {/* ── Level + XP hero block ─────────────────────────────────────── */}
+            <div
+              className="rounded-2xl p-4 border"
+              style={{
+                background: "linear-gradient(135deg, #1a0d2e 0%, #111d2e 100%)",
+                borderColor: "#B44FFF44",
+              }}
+            >
+              {/* Level badge + label */}
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div
+                    className="w-12 h-12 rounded-2xl flex items-center justify-center font-display font-black text-xl"
+                    style={{
+                      background: "linear-gradient(135deg, #B44FFF, #7B2FBE)",
+                      boxShadow: "0 0 20px #B44FFF66",
+                      color: "#FFFFFF",
+                    }}
+                  >
+                    {currentLevel}
+                  </div>
+                  <div>
+                    <p
+                      className="font-display font-black text-lg tracking-widest uppercase"
+                      style={{ color: "#B44FFF", lineHeight: 1 }}
+                    >
+                      LEVEL {currentLevel}
+                    </p>
+                    <p
+                      className="font-display font-bold text-xs"
+                      style={{ color: "#7A9BB5" }}
+                    >
+                      {isMaxLevel
+                        ? "MAX LEVEL REACHED"
+                        : `${currentXp.toLocaleString()} XP total`}
+                    </p>
+                  </div>
+                </div>
+                {!isMaxLevel && (
+                  <div className="text-right">
+                    <p
+                      className="font-display font-black text-base"
+                      style={{ color: "#FFFFFF" }}
+                    >
+                      {xpIntoLevel.toLocaleString()}
+                    </p>
+                    <p
+                      className="font-display font-bold text-xs"
+                      style={{ color: "#556678" }}
+                    >
+                      / {xpNeededForLevel.toLocaleString()} XP
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* XP progress bar */}
+              {!isMaxLevel ? (
+                <>
+                  <div
+                    className="w-full h-3 rounded-full overflow-hidden mb-1.5"
+                    style={{ background: "#1e2d40" }}
+                  >
+                    <div
+                      className="h-full rounded-full"
+                      style={{
+                        width: `${xpPct}%`,
+                        background: "linear-gradient(90deg, #B44FFF, #00D4AA)",
+                        boxShadow: "0 0 10px #B44FFF88",
+                        transition: "width 0.8s ease",
+                      }}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between mb-3">
+                    <span
+                      className="font-display font-bold text-xs"
+                      style={{ color: "#B44FFF" }}
+                    >
+                      Level {currentLevel}
+                    </span>
+                    <span
+                      className="font-display font-bold text-xs"
+                      style={{ color: "#556678" }}
+                    >
+                      {Math.round(xpPct)}%
+                    </span>
+                    <span
+                      className="font-display font-bold text-xs"
+                      style={{ color: "#00D4AA" }}
+                    >
+                      Level {currentLevel + 1}
+                    </span>
+                  </div>
+
+                  {/* Next unlock call-out */}
+                  {nextCarUnlock && (
+                    <div
+                      className="flex items-center gap-3 px-3 py-2 rounded-xl"
+                      style={{
+                        background: "rgba(0,212,170,0.08)",
+                        border: "1px solid rgba(0,212,170,0.25)",
+                      }}
+                    >
+                      <span style={{ fontSize: "1.4rem" }}>🚗</span>
+                      <div>
+                        <p
+                          className="font-display font-black text-xs uppercase tracking-wider"
+                          style={{ color: "#00D4AA" }}
+                        >
+                          Next: Level {currentLevel + 1} unlocks {nextCarUnlock}
+                        </p>
+                        <p
+                          className="font-display font-bold text-xs"
+                          style={{ color: "#445566" }}
+                        >
+                          {(nextLevelStart - currentXp).toLocaleString()} XP to
+                          go
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div
+                  className="flex items-center justify-center gap-2 py-2 rounded-xl"
+                  style={{
+                    background: "rgba(255,215,0,0.08)",
+                    border: "1px solid rgba(255,215,0,0.2)",
+                  }}
+                >
+                  <span style={{ fontSize: "1.4rem" }}>👑</span>
+                  <p
+                    className="font-display font-black text-sm uppercase"
+                    style={{ color: "#FFD700" }}
+                  >
+                    All cars unlocked!
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* ── Stats table ───────────────────────────────────────────────── */}
             <div
               className="rounded-2xl border overflow-hidden"
               style={{ borderColor: "#1e2d40" }}
@@ -496,58 +660,26 @@ export default function LeaderboardScreen() {
               {statItems.map(({ label, value, icon, color }, i) => (
                 <div
                   key={label}
-                  className="flex items-center justify-between px-4 py-3 border-b last:border-0"
+                  className="flex items-center justify-between px-3 py-2.5 border-b last:border-0"
                   style={{
                     background: i % 2 === 0 ? "#111d2e" : "#0d1826",
                     borderColor: "#1e2d40",
                   }}
                 >
                   <div className="flex items-center gap-2">
-                    <span className="text-lg">{icon}</span>
-                    <span className="text-muted-foreground text-sm font-body">
+                    <span className="text-base">{icon}</span>
+                    <span className="text-muted-foreground font-body text-xs">
                       {label}
                     </span>
                   </div>
                   <span
-                    className="font-display font-bold text-sm"
+                    className="font-display font-bold text-xs"
                     style={{ color }}
                   >
                     {value}
                   </span>
                 </div>
               ))}
-            </div>
-
-            {/* XP bar */}
-            <div
-              className="rounded-2xl p-4 border"
-              style={{ background: "#111d2e", borderColor: "#B44FFF44" }}
-            >
-              <div className="flex justify-between mb-2">
-                <span className="font-display font-bold text-sm text-foreground">
-                  XP Progress
-                </span>
-                <span className="text-muted-foreground text-sm">
-                  {profile.xp % 1000} / 1000
-                </span>
-              </div>
-              <div
-                className="w-full h-3 rounded-full overflow-hidden"
-                style={{ background: "#1e2d40" }}
-              >
-                <div
-                  className="h-full rounded-full"
-                  style={{
-                    width: `${(profile.xp % 1000) / 10}%`,
-                    background: "linear-gradient(90deg, #B44FFF, #00D4AA)",
-                    boxShadow: "0 0 10px #B44FFF88",
-                    transition: "width 0.8s ease",
-                  }}
-                />
-              </div>
-              <p className="text-xs text-muted-foreground text-right mt-1">
-                Level {profile.level} → {profile.level + 1}
-              </p>
             </div>
           </div>
         )}
@@ -569,7 +701,7 @@ export default function LeaderboardScreen() {
           type="button"
           data-ocid="leaderboard.back_to_menu_button"
           onClick={() => navigate({ to: "/menu" })}
-          className="w-full py-3 rounded-2xl font-display font-bold text-sm tracking-widest uppercase border transition-smooth"
+          className="w-full py-3 rounded-2xl font-display font-bold text-xs tracking-widest uppercase border transition-smooth"
           style={{
             background: "transparent",
             borderColor: "#FFD70066",

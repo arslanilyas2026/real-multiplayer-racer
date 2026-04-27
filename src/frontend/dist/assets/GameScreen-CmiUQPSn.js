@@ -1,9 +1,9 @@
-import { u as useNavigate, r as reactExports, j as jsxRuntimeExports } from "./index-C9nsfCGx.js";
-import { A as AI_PERSONALITIES, g as getAIDifficulty, r as randomAIName, a as randomAICarType, b as AI_SPEED_MULTIPLIERS, c as getAITaunt } from "./aiOpponents-DxnGG1Aw.js";
-import { g as getCarData } from "./cars-BYK3CU46.js";
-import { g as getMapData } from "./maps-BUrdhEDR.js";
-import { g as getPowerUpData } from "./powerups-gDkT3A0P.js";
-import { u as useGameStore, P as PowerUpType, M as MapTheme, G as GameMode } from "./gameStore-5oklP8TG.js";
+import { u as useNavigate, r as reactExports, j as jsxRuntimeExports } from "./index-B6JfqekL.js";
+import { A as AI_PERSONALITIES, g as getAIDifficulty, r as randomAIName, a as randomAICarType, b as AI_SPEED_MULTIPLIERS, c as getAITaunt } from "./aiOpponents-DxngDPPo.js";
+import { g as getCarData } from "./cars-BBAU-OP8.js";
+import { g as getMapData } from "./maps-BAIToim9.js";
+import { g as getPowerUpData } from "./powerups-Ccl822wB.js";
+import { u as useGameStore, P as PowerUpType, M as MapTheme, G as GameMode } from "./gameStore-sCxKMV8R.js";
 const LANE_COUNT = 5;
 const ROAD_RATIO = 0.82;
 const CAR_W = 36;
@@ -1591,7 +1591,7 @@ function GameScreen() {
     ]
   );
   const drawCarShape = reactExports.useCallback(
-    (ctx, w, h, bodyColor, accentColor, isLarge = false) => {
+    (ctx, w, h, bodyColor, accentColor, isLarge = false, carTypeKey = "BASIC") => {
       const hw = w / 2;
       const hh = h / 2;
       if (isLarge) {
@@ -1605,13 +1605,9 @@ function GameScreen() {
         ctx.roundRect(-hw, -hh, w, hh * 0.45, [hw * 0.18, hw * 0.18, 0, 0]);
         ctx.fill();
         ctx.globalAlpha = 1;
-        ctx.fillStyle = "rgba(140, 220, 255, 0.8)";
+        ctx.fillStyle = "rgba(140,220,255,0.8)";
         ctx.beginPath();
         ctx.roundRect(-hw * 0.72, -hh + h * 0.08, hw * 1.44, hh * 0.28, 3);
-        ctx.fill();
-        ctx.fillStyle = "rgba(255,255,255,0.3)";
-        ctx.beginPath();
-        ctx.roundRect(-hw * 0.35, -hh + h * 0.09, hw * 0.5, hh * 0.1, 2);
         ctx.fill();
         ctx.strokeStyle = "rgba(0,0,0,0.22)";
         ctx.lineWidth = 1.5;
@@ -1659,47 +1655,253 @@ function GameScreen() {
           ctx.arc(tx2, hh - h * 0.06, w * 0.06, 0, Math.PI * 2);
           ctx.fill();
         }
-      } else {
-        const frontW = hw * 0.92;
-        const rearW = hw * 0.78;
-        const bodyR = hw * 0.22;
+        return;
+      }
+      if (carTypeKey === "RACE") {
         ctx.fillStyle = bodyColor;
         ctx.beginPath();
-        ctx.moveTo(0 - frontW, -hh + bodyR);
-        ctx.quadraticCurveTo(-frontW, -hh, -frontW + bodyR * 0.8, -hh);
-        ctx.lineTo(frontW - bodyR * 0.8, -hh);
-        ctx.quadraticCurveTo(frontW, -hh, frontW, -hh + bodyR);
-        ctx.lineTo(frontW * 0.88, hh * 0.35);
-        ctx.lineTo(rearW, hh * 0.6);
-        ctx.quadraticCurveTo(rearW, hh, rearW - bodyR * 0.7, hh);
-        ctx.lineTo(-rearW + bodyR * 0.7, hh);
-        ctx.quadraticCurveTo(-rearW, hh, -rearW, hh * 0.6);
-        ctx.lineTo(-frontW * 0.88, hh * 0.35);
+        ctx.moveTo(-hw * 0.38, -hh);
+        ctx.lineTo(hw * 0.38, -hh);
+        ctx.lineTo(hw * 0.25, hh);
+        ctx.lineTo(-hw * 0.25, hh);
         ctx.closePath();
         ctx.fill();
         ctx.fillStyle = accentColor;
-        ctx.globalAlpha = 0.55;
+        ctx.globalAlpha = 0.9;
+        for (const [x1, x2] of [
+          [-hw * 0.38, -hw],
+          [hw * 0.38, hw]
+        ]) {
+          ctx.beginPath();
+          ctx.moveTo(x1, -hh + h * 0.12);
+          ctx.lineTo(x2, -hh + h * 0.12);
+          ctx.lineTo(x2, -hh + h * 0.22);
+          ctx.lineTo(x1, -hh + h * 0.22);
+          ctx.closePath();
+          ctx.fill();
+        }
         ctx.beginPath();
-        ctx.moveTo(-frontW + bodyR * 0.8, -hh);
-        ctx.lineTo(frontW - bodyR * 0.8, -hh);
+        ctx.roundRect(-hw * 0.55, hh - h * 0.1, hw * 1.1, h * 0.1, 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = "rgba(100,200,255,0.8)";
+        ctx.beginPath();
+        ctx.ellipse(0, -hh * 0.2, hw * 0.22, hh * 0.32, 0, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (carTypeKey === "JET") {
+        ctx.fillStyle = bodyColor;
+        ctx.beginPath();
+        ctx.moveTo(0, -hh - h * 0.08);
+        ctx.lineTo(hw * 0.72, -hh + h * 0.22);
+        ctx.lineTo(hw * 0.62, hh);
+        ctx.lineTo(-hw * 0.62, hh);
+        ctx.lineTo(-hw * 0.72, -hh + h * 0.22);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = accentColor;
+        ctx.globalAlpha = 0.7;
+        ctx.beginPath();
+        ctx.moveTo(hw * 0.72, -hh + h * 0.22);
+        ctx.lineTo(hw, 0);
+        ctx.lineTo(hw * 0.62, hh);
+        ctx.closePath();
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(-hw * 0.72, -hh + h * 0.22);
+        ctx.lineTo(-hw, 0);
+        ctx.lineTo(-hw * 0.62, hh);
+        ctx.closePath();
+        ctx.fill();
+        for (const ex of [-hw * 0.3, 0, hw * 0.3]) {
+          ctx.beginPath();
+          ctx.ellipse(
+            ex,
+            hh - h * 0.04,
+            hw * 0.12,
+            hh * 0.08,
+            0,
+            0,
+            Math.PI * 2
+          );
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = "rgba(100,200,255,0.75)";
+        ctx.beginPath();
+        ctx.ellipse(0, -hh * 0.25, hw * 0.35, hh * 0.28, 0, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (carTypeKey === "HYPER") {
+        const r = hw * 0.15;
+        ctx.fillStyle = bodyColor;
+        ctx.beginPath();
+        ctx.moveTo(-hw + r, -hh);
+        ctx.lineTo(hw - r, -hh);
+        ctx.quadraticCurveTo(hw, -hh, hw, -hh + r);
+        ctx.lineTo(hw * 0.92, hh - r);
+        ctx.quadraticCurveTo(hw * 0.92, hh, hw * 0.92 - r, hh);
+        ctx.lineTo(-hw * 0.92 + r, hh);
+        ctx.quadraticCurveTo(-hw * 0.92, hh, -hw * 0.92, hh - r);
+        ctx.lineTo(-hw, -hh + r);
+        ctx.quadraticCurveTo(-hw, -hh, -hw + r, -hh);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = accentColor;
+        ctx.globalAlpha = 0.9;
+        ctx.fillRect(-hw, -hh, w, h * 0.06);
+        ctx.fillStyle = "rgba(0,0,0,0.6)";
+        ctx.beginPath();
+        ctx.roundRect(-hw + hw * 0.05, -hh * 0.3, hw * 0.22, hh * 0.4, 3);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.roundRect(hw * 0.73, -hh * 0.3, hw * 0.22, hh * 0.4, 3);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = "rgba(100,200,255,0.75)";
+        ctx.beginPath();
+        ctx.roundRect(-hw * 0.62, -hh + h * 0.18, hw * 1.24, hh * 0.28, 4);
+        ctx.fill();
+        ctx.fillStyle = "rgba(0,0,0,0.45)";
+        ctx.beginPath();
+        ctx.roundRect(-hw * 0.58, -hh * 0.1, hw * 1.16, hh * 0.4, 5);
+        ctx.fill();
+      } else if (carTypeKey === "LIGHTNING") {
+        ctx.fillStyle = bodyColor;
+        ctx.beginPath();
+        ctx.moveTo(0, -hh);
+        ctx.lineTo(hw * 0.82, -hh + h * 0.18);
+        ctx.lineTo(hw, -hh + h * 0.38);
+        ctx.lineTo(hw * 0.72, hh * 0.35);
+        ctx.lineTo(hw * 0.88, hh);
+        ctx.lineTo(-hw * 0.88, hh);
+        ctx.lineTo(-hw * 0.72, hh * 0.35);
+        ctx.lineTo(-hw, -hh + h * 0.38);
+        ctx.lineTo(-hw * 0.82, -hh + h * 0.18);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = accentColor;
+        ctx.lineWidth = hw * 0.12;
+        ctx.lineCap = "round";
+        ctx.globalAlpha = 0.85;
+        ctx.beginPath();
+        ctx.moveTo(-hw * 0.15, -hh * 0.6);
+        ctx.lineTo(hw * 0.05, -hh * 0.05);
+        ctx.lineTo(-hw * 0.18, hh * 0.1);
+        ctx.lineTo(hw * 0.15, hh * 0.6);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+        ctx.lineCap = "butt";
+        ctx.fillStyle = "rgba(100,200,255,0.75)";
+        ctx.beginPath();
+        ctx.moveTo(-hw * 0.55, -hh + h * 0.2);
+        ctx.lineTo(hw * 0.55, -hh + h * 0.2);
+        ctx.lineTo(hw * 0.42, -hh + h * 0.42);
+        ctx.lineTo(-hw * 0.42, -hh + h * 0.42);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = "rgba(0,0,0,0.45)";
+        ctx.beginPath();
+        ctx.roundRect(-hw * 0.5, -hh * 0.02, hw * 1, hh * 0.38, 4);
+        ctx.fill();
+      } else if (carTypeKey === "STREET") {
+        const r = hw * 0.18;
+        ctx.fillStyle = bodyColor;
+        ctx.beginPath();
+        ctx.moveTo(-hw + r, -hh + h * 0.1);
+        ctx.quadraticCurveTo(-hw, -hh + h * 0.1, -hw, -hh + h * 0.18);
+        ctx.lineTo(-hw * 0.95, hh - r);
+        ctx.quadraticCurveTo(-hw * 0.95, hh, -hw * 0.95 + r, hh);
+        ctx.lineTo(hw * 0.95 - r, hh);
+        ctx.quadraticCurveTo(hw * 0.95, hh, hw * 0.95, hh - r);
+        ctx.lineTo(hw, -hh + h * 0.18);
+        ctx.quadraticCurveTo(hw, -hh + h * 0.1, hw - r, -hh + h * 0.1);
+        ctx.lineTo(hw * 0.55, -hh);
+        ctx.lineTo(-hw * 0.55, -hh);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = "rgba(0,0,0,0.8)";
+        ctx.beginPath();
+        ctx.roundRect(-hw * 0.68, -hh + h * 0.22, hw * 1.36, hh * 0.3, 3);
+        ctx.fill();
+        ctx.fillStyle = "rgba(0,0,0,0.65)";
+        ctx.beginPath();
+        ctx.roundRect(-hw * 0.6, -hh * 0.06, hw * 1.2, hh * 0.42, 4);
+        ctx.fill();
+        ctx.fillStyle = accentColor;
+        ctx.globalAlpha = 0.7;
+        ctx.fillRect(-hw * 0.95, -hh * 0.04, hw * 1.9, hh * 0.1);
+        ctx.globalAlpha = 1;
+      } else if (carTypeKey === "SPORT") {
+        const fw = hw * 0.88;
+        const rw = hw * 0.72;
+        ctx.fillStyle = bodyColor;
+        ctx.beginPath();
+        ctx.moveTo(-fw + hw * 0.2, -hh);
+        ctx.lineTo(fw - hw * 0.2, -hh);
+        ctx.quadraticCurveTo(fw, -hh, fw, -hh + h * 0.08);
+        ctx.lineTo(fw * 0.85, hh * 0.65);
+        ctx.lineTo(rw, hh);
+        ctx.lineTo(-rw, hh);
+        ctx.lineTo(-fw * 0.85, hh * 0.65);
+        ctx.lineTo(-fw, -hh + h * 0.08);
+        ctx.quadraticCurveTo(-fw, -hh, -fw + hw * 0.2, -hh);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = "rgba(100,200,255,0.78)";
+        ctx.beginPath();
+        ctx.moveTo(-fw * 0.75, -hh + h * 0.2);
+        ctx.lineTo(fw * 0.75, -hh + h * 0.2);
+        ctx.lineTo(fw * 0.62, -hh + h * 0.44);
+        ctx.lineTo(-fw * 0.62, -hh + h * 0.44);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = "rgba(0,0,0,0.42)";
+        ctx.beginPath();
+        ctx.roundRect(-hw * 0.55, -hh * 0.05, hw * 1.1, hh * 0.42, 4);
+        ctx.fill();
+        ctx.fillStyle = accentColor;
+        ctx.globalAlpha = 0.9;
+        ctx.beginPath();
+        ctx.roundRect(-rw * 0.82, hh * 0.72, rw * 1.64, hh * 0.14, 3);
+        ctx.fill();
+        ctx.fillRect(-rw * 0.28, hh * 0.58, rw * 0.14, hh * 0.18);
+        ctx.fillRect(rw * 0.14, hh * 0.58, rw * 0.14, hh * 0.18);
+        ctx.globalAlpha = 1;
+      } else {
+        const frontW = hw * 0.86;
+        const rearW = hw * 0.76;
+        const bodyR = hw * 0.22;
+        ctx.fillStyle = bodyColor;
+        ctx.beginPath();
+        ctx.moveTo(-frontW + bodyR, -hh);
+        ctx.lineTo(frontW - bodyR, -hh);
+        ctx.quadraticCurveTo(frontW, -hh, frontW, -hh + bodyR);
+        ctx.lineTo(frontW * 0.9, hh * 0.7);
+        ctx.lineTo(rearW, hh);
+        ctx.lineTo(-rearW, hh);
+        ctx.lineTo(-frontW * 0.9, hh * 0.7);
+        ctx.lineTo(-frontW, -hh + bodyR);
+        ctx.quadraticCurveTo(-frontW, -hh, -frontW + bodyR, -hh);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = accentColor;
+        ctx.globalAlpha = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(-frontW + bodyR, -hh);
+        ctx.lineTo(frontW - bodyR, -hh);
         ctx.lineTo(frontW * 0.82, -hh + h * 0.22);
         ctx.lineTo(-frontW * 0.82, -hh + h * 0.22);
         ctx.closePath();
         ctx.fill();
         ctx.globalAlpha = 1;
-        ctx.fillStyle = "rgba(100, 200, 255, 0.75)";
+        ctx.fillStyle = "rgba(100,200,255,0.75)";
         ctx.beginPath();
         ctx.roundRect(-hw * 0.7, -hh + h * 0.22, hw * 1.4, hh * 0.3, 4);
-        ctx.fill();
-        ctx.fillStyle = "rgba(255,255,255,0.32)";
-        ctx.beginPath();
-        ctx.roundRect(-hw * 0.35, -hh + h * 0.24, hw * 0.5, hh * 0.12, 2);
         ctx.fill();
         ctx.fillStyle = "rgba(0,0,0,0.38)";
         ctx.beginPath();
         ctx.roundRect(-hw * 0.62, -hh * 0.08, hw * 1.24, hh * 0.45, 5);
         ctx.fill();
-        ctx.fillStyle = "rgba(100, 190, 255, 0.42)";
+        ctx.fillStyle = "rgba(100,190,255,0.42)";
         ctx.beginPath();
         ctx.roundRect(-hw * 0.5, hh * 0.4, hw * 1, hh * 0.22, 3);
         ctx.fill();
@@ -1714,69 +1916,67 @@ function GameScreen() {
         ]);
         ctx.fill();
         ctx.globalAlpha = 1;
-        const wr = w * 0.16;
-        const wx = hw - wr * 0.15;
-        const wyF2 = -hh + h * 0.25;
-        const wyR2 = hh * 0.65;
-        for (const [cx2, cy2] of [
-          [-wx, wyF2],
-          [wx, wyF2],
-          // front left, front right
-          [-wx, wyR2],
-          [wx, wyR2]
-          // rear left, rear right
-        ]) {
-          ctx.fillStyle = "rgba(0,0,0,0.4)";
-          ctx.beginPath();
-          ctx.ellipse(cx2 + 1, cy2 + 2, wr, wr * 0.78, 0, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.fillStyle = "#0d0d1a";
-          ctx.beginPath();
-          ctx.ellipse(cx2, cy2, wr, wr * 0.78, 0, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.fillStyle = "#7a7a8a";
-          ctx.beginPath();
-          ctx.arc(cx2, cy2, wr * 0.52, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.fillStyle = "#b0b0c0";
-          ctx.beginPath();
-          ctx.arc(cx2, cy2, wr * 0.28, 0, Math.PI * 2);
-          ctx.fill();
-        }
-        const hlY2 = -hh + h * 0.06;
-        const hlX2 = frontW * 0.62;
-        const hlR2 = w * 0.11;
-        for (const hx2 of [-hlX2, hlX2]) {
-          ctx.fillStyle = "rgba(255, 240, 80, 0.55)";
-          ctx.beginPath();
-          ctx.arc(hx2, hlY2, hlR2 * 1.8, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.fillStyle = "#FFE44D";
-          ctx.beginPath();
-          ctx.ellipse(hx2, hlY2, hlR2, hlR2 * 0.68, 0, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.fillStyle = "#FFFFFF";
-          ctx.beginPath();
-          ctx.arc(hx2, hlY2, hlR2 * 0.4, 0, Math.PI * 2);
-          ctx.fill();
-        }
-        const tlY2 = hh - h * 0.06;
-        const tlX2 = rearW * 0.62;
-        const tlR2 = w * 0.1;
-        for (const tx2 of [-tlX2, tlX2]) {
-          ctx.fillStyle = "rgba(255, 20, 20, 0.5)";
-          ctx.beginPath();
-          ctx.arc(tx2, tlY2, tlR2 * 1.7, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.fillStyle = "#FF1A1A";
-          ctx.beginPath();
-          ctx.ellipse(tx2, tlY2, tlR2, tlR2 * 0.65, 0, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.fillStyle = "#FF8080";
-          ctx.beginPath();
-          ctx.arc(tx2, tlY2, tlR2 * 0.38, 0, Math.PI * 2);
-          ctx.fill();
-        }
+      }
+      const wr = w * 0.16;
+      const wx = hw - wr * 0.15;
+      const wyF2 = -hh + h * 0.25;
+      const wyR2 = hh * 0.65;
+      for (const [cx2, cy2] of [
+        [-wx, wyF2],
+        [wx, wyF2],
+        [-wx, wyR2],
+        [wx, wyR2]
+      ]) {
+        ctx.fillStyle = "rgba(0,0,0,0.4)";
+        ctx.beginPath();
+        ctx.ellipse(cx2 + 1, cy2 + 2, wr, wr * 0.78, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#0d0d1a";
+        ctx.beginPath();
+        ctx.ellipse(cx2, cy2, wr, wr * 0.78, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#7a7a8a";
+        ctx.beginPath();
+        ctx.arc(cx2, cy2, wr * 0.52, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#b0b0c0";
+        ctx.beginPath();
+        ctx.arc(cx2, cy2, wr * 0.28, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      const hlY2 = -hh + h * 0.06;
+      const hlX2 = carTypeKey === "RACE" ? hw * 0.22 : carTypeKey === "JET" ? hw * 0.38 : hw * 0.62;
+      const hlR2 = w * 0.11;
+      for (const hx2 of [-hlX2, hlX2]) {
+        ctx.fillStyle = "rgba(255,240,80,0.55)";
+        ctx.beginPath();
+        ctx.arc(hx2, hlY2, hlR2 * 1.8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#FFE44D";
+        ctx.beginPath();
+        ctx.ellipse(hx2, hlY2, hlR2, hlR2 * 0.68, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#FFFFFF";
+        ctx.beginPath();
+        ctx.arc(hx2, hlY2, hlR2 * 0.4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      const tlY2 = hh - h * 0.06;
+      const tlX2 = carTypeKey === "RACE" ? hw * 0.22 : hw * 0.62;
+      const tlR2 = w * 0.1;
+      for (const tx2 of [-tlX2, tlX2]) {
+        ctx.fillStyle = "rgba(255,20,20,0.5)";
+        ctx.beginPath();
+        ctx.arc(tx2, tlY2, tlR2 * 1.7, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#FF1A1A";
+        ctx.beginPath();
+        ctx.ellipse(tx2, tlY2, tlR2, tlR2 * 0.65, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#FF8080";
+        ctx.beginPath();
+        ctx.arc(tx2, tlY2, tlR2 * 0.38, 0, Math.PI * 2);
+        ctx.fill();
       }
     },
     []
@@ -1801,7 +2001,8 @@ function GameScreen() {
       }
       const isLarge = carStyle >= 6;
       const accentColor = CAR_ACCENT[carTypeKey] ?? glowColor;
-      drawCarShape(ctx, w, h, color, accentColor, isLarge);
+      ctx.shadowBlur = 0;
+      drawCarShape(ctx, w, h, color, accentColor, isLarge, carTypeKey);
       ctx.restore();
     },
     [drawCarShape]
@@ -1873,7 +2074,8 @@ function GameScreen() {
       ctx.shadowBlur = 14 * glowPulse;
       ctx.shadowColor = ai.glowColor;
       ctx.translate(ax, ay);
-      drawCarShape(ctx, w, h, ai.carColor, ai.glowColor, false);
+      ctx.shadowBlur = 0;
+      drawCarShape(ctx, w, h, ai.carColor, ai.glowColor, false, ai.carType);
       ctx.restore();
       ctx.save();
       ctx.shadowBlur = 12;

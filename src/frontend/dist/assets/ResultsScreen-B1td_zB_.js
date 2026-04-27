@@ -1,13 +1,14 @@
-import { u as useNavigate, r as reactExports, j as jsxRuntimeExports } from "./index-C9nsfCGx.js";
-import { A as AI_PERSONALITIES } from "./aiOpponents-DxnGG1Aw.js";
-import { a as apiSubmitRaceResult } from "./api-epEIN8mK.js";
-import { u as useGameStore, a as CarType } from "./gameStore-5oklP8TG.js";
+import { u as useNavigate, r as reactExports, j as jsxRuntimeExports } from "./index-B6JfqekL.js";
+import { A as AI_PERSONALITIES } from "./aiOpponents-DxngDPPo.js";
+import { a as apiSubmitRaceResult } from "./api-DxCNr74K.js";
+import { u as useGameStore, a as CarType } from "./gameStore-sCxKMV8R.js";
 const CAR_EMOJI = {
   [CarType.BASIC]: "🚗",
   [CarType.SPORT]: "🏎️",
   [CarType.STREET]: "🚙",
   [CarType.JET]: "✈️",
   [CarType.RACE]: "🏁",
+  [CarType.SUPER]: "🚀",
   [CarType.HYPER]: "⚡",
   [CarType.LIGHTNING]: "🌩️"
 };
@@ -616,8 +617,8 @@ function ResultsScreen() {
                 onClick: () => {
                   if (navigator.share) {
                     navigator.share({
-                      title: "Real Multiplayer Racer",
-                      text: `I scored ${score.toLocaleString()} pts in Real Multiplayer Racer! 🏎️🔥`
+                      title: "Lane Racer: Car Racing Clash",
+                      text: `I scored ${score.toLocaleString()} pts in Lane Racer: Car Racing Clash! 🏎️🔥`
                     });
                   }
                 },

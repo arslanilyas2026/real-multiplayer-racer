@@ -40,7 +40,7 @@ export default function MenuScreen() {
 
   return (
     <div
-      className="fixed inset-0 flex flex-col overflow-hidden bg-stripe-overlay"
+      className="fixed inset-0 flex flex-col overflow-hidden"
       style={{ background: "#0D1B2A" }}
       data-ocid="menu.page"
     >
@@ -57,17 +57,7 @@ export default function MenuScreen() {
         .play-btn-glow { animation: play-glow 2s ease-in-out infinite; }
       `}</style>
 
-      {/* Diagonal stripe overlay — subtle depth layer */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          backgroundImage:
-            "repeating-linear-gradient(45deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 2px, transparent 2px, transparent 28px)",
-          zIndex: 0,
-        }}
-      />
-
-      <div className="relative z-10 flex flex-col h-full px-5">
+      <div className="flex flex-col h-full px-5">
         {/* Logo area */}
         <div className="flex flex-col items-center pt-14 pb-3">
           <p
@@ -84,7 +74,7 @@ export default function MenuScreen() {
               letterSpacing: "0.04em",
             }}
           >
-            REAL MULTIPLAYER RACER
+            LANE RACER: CAR RACING CLASH
           </h1>
         </div>
 
@@ -235,15 +225,7 @@ export default function MenuScreen() {
             SINGLE PLAYER · v1.0
           </p>
           <p className="text-xs" style={{ color: "#FFFFFF22" }}>
-            © {new Date().getFullYear()}. Built with love using{" "}
-            <a
-              href={`https://caffeine.ai?utm_source=caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname)}`}
-              target="_blank"
-              rel="noreferrer"
-              style={{ color: "#FF6B2B55", textDecoration: "underline" }}
-            >
-              caffeine.ai
-            </a>
+            © {new Date().getFullYear()}. Developed by Wevo Soft
           </p>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { u as useNavigate, j as jsxRuntimeExports } from "./index-C9nsfCGx.js";
+import { u as useNavigate, j as jsxRuntimeExports } from "./index-B6JfqekL.js";
 const SAMPLE_CHALLENGES = [
   {
     id: "collect-100-coins",

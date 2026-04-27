@@ -1,4 +1,4 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/MenuScreen-EWc590sY.js","assets/cars-BYK3CU46.js","assets/gameStore-5oklP8TG.js","assets/CarSelectScreen-Ms2dksOy.js","assets/GameModeScreen-Bj0c8VVm.js","assets/maps-BUrdhEDR.js","assets/UpgradesScreen-MoshmJF5.js","assets/powerups-gDkT3A0P.js","assets/GameScreen-DghEyl6e.js","assets/aiOpponents-DxnGG1Aw.js","assets/CrashScreen-jBDzmgv1.js","assets/ResultsScreen-BLSgXlaB.js","assets/api-epEIN8mK.js","assets/LeaderboardScreen-DCxeg3n3.js"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/MenuScreen-UXD46OWv.js","assets/cars-BBAU-OP8.js","assets/gameStore-sCxKMV8R.js","assets/CarSelectScreen-etHAHUIQ.js","assets/GameModeScreen-DqX3Dh-W.js","assets/maps-BAIToim9.js","assets/UpgradesScreen-CxWBINdL.js","assets/powerups-Ccl822wB.js","assets/GameScreen-CmiUQPSn.js","assets/aiOpponents-DxngDPPo.js","assets/CrashScreen-C9n2ZTIQ.js","assets/ResultsScreen-B1td_zB_.js","assets/api-DxCNr74K.js","assets/LeaderboardScreen-HwVkmPMb.js"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __typeError = (msg) => {
   throw TypeError(msg);
@@ -23678,16 +23678,16 @@ function RouterContextProvider({
 function RouterProvider({ router: router2, ...rest }) {
   return /* @__PURE__ */ jsxRuntimeExports.jsx(RouterContextProvider, { router: router2, ...rest, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Matches, {}) });
 }
-const SplashScreen = reactExports.lazy(() => __vitePreload(() => import("./SplashScreen-Bhcg3I0p.js"), true ? [] : void 0));
-const MenuScreen = reactExports.lazy(() => __vitePreload(() => import("./MenuScreen-EWc590sY.js"), true ? __vite__mapDeps([0,1,2]) : void 0));
-const CarSelectScreen = reactExports.lazy(() => __vitePreload(() => import("./CarSelectScreen-Ms2dksOy.js"), true ? __vite__mapDeps([3,1,2]) : void 0));
-const GameModeScreen = reactExports.lazy(() => __vitePreload(() => import("./GameModeScreen-Bj0c8VVm.js"), true ? __vite__mapDeps([4,5,2]) : void 0));
-const UpgradesScreen = reactExports.lazy(() => __vitePreload(() => import("./UpgradesScreen-MoshmJF5.js"), true ? __vite__mapDeps([6,7,2]) : void 0));
-const GameScreen = reactExports.lazy(() => __vitePreload(() => import("./GameScreen-DghEyl6e.js"), true ? __vite__mapDeps([8,9,2,1,5,7]) : void 0));
-const CrashScreen = reactExports.lazy(() => __vitePreload(() => import("./CrashScreen-jBDzmgv1.js"), true ? __vite__mapDeps([10,2]) : void 0));
-const ResultsScreen = reactExports.lazy(() => __vitePreload(() => import("./ResultsScreen-BLSgXlaB.js"), true ? __vite__mapDeps([11,9,2,12]) : void 0));
-const LeaderboardScreen = reactExports.lazy(() => __vitePreload(() => import("./LeaderboardScreen-DCxeg3n3.js"), true ? __vite__mapDeps([13,12,2]) : void 0));
-const ChallengesScreen = reactExports.lazy(() => __vitePreload(() => import("./ChallengesScreen-eX0x4aLl.js"), true ? [] : void 0));
+const SplashScreen = reactExports.lazy(() => __vitePreload(() => import("./SplashScreen-lK2_mKsj.js"), true ? [] : void 0));
+const MenuScreen = reactExports.lazy(() => __vitePreload(() => import("./MenuScreen-UXD46OWv.js"), true ? __vite__mapDeps([0,1,2]) : void 0));
+const CarSelectScreen = reactExports.lazy(() => __vitePreload(() => import("./CarSelectScreen-etHAHUIQ.js"), true ? __vite__mapDeps([3,1,2]) : void 0));
+const GameModeScreen = reactExports.lazy(() => __vitePreload(() => import("./GameModeScreen-DqX3Dh-W.js"), true ? __vite__mapDeps([4,5,2]) : void 0));
+const UpgradesScreen = reactExports.lazy(() => __vitePreload(() => import("./UpgradesScreen-CxWBINdL.js"), true ? __vite__mapDeps([6,7,2]) : void 0));
+const GameScreen = reactExports.lazy(() => __vitePreload(() => import("./GameScreen-CmiUQPSn.js"), true ? __vite__mapDeps([8,9,2,1,5,7]) : void 0));
+const CrashScreen = reactExports.lazy(() => __vitePreload(() => import("./CrashScreen-C9n2ZTIQ.js"), true ? __vite__mapDeps([10,2]) : void 0));
+const ResultsScreen = reactExports.lazy(() => __vitePreload(() => import("./ResultsScreen-B1td_zB_.js"), true ? __vite__mapDeps([11,9,2,12]) : void 0));
+const LeaderboardScreen = reactExports.lazy(() => __vitePreload(() => import("./LeaderboardScreen-HwVkmPMb.js"), true ? __vite__mapDeps([13,12,2]) : void 0));
+const ChallengesScreen = reactExports.lazy(() => __vitePreload(() => import("./ChallengesScreen-Bj_ZKCPD.js"), true ? [] : void 0));
 const GameLoader = () => /* @__PURE__ */ jsxRuntimeExports.jsx(
   "div",
   {

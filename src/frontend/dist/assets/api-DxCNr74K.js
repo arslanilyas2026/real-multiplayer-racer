@@ -1,4 +1,4 @@
-import { a as CarType } from "./gameStore-5oklP8TG.js";
+import { a as CarType } from "./gameStore-sCxKMV8R.js";
 async function apiSubmitRaceResult(result) {
   console.log("[API] submitRaceResult", result);
 }

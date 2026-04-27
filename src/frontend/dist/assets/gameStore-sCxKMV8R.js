@@ -1,10 +1,11 @@
-import { R as React } from "./index-C9nsfCGx.js";
+import { R as React } from "./index-B6JfqekL.js";
 var CarType = /* @__PURE__ */ ((CarType2) => {
   CarType2["BASIC"] = "BASIC";
   CarType2["SPORT"] = "SPORT";
   CarType2["STREET"] = "STREET";
   CarType2["JET"] = "JET";
   CarType2["RACE"] = "RACE";
+  CarType2["SUPER"] = "SUPER";
   CarType2["HYPER"] = "HYPER";
   CarType2["LIGHTNING"] = "LIGHTNING";
   return CarType2;
@@ -40,6 +41,24 @@ var CarColor = /* @__PURE__ */ ((CarColor2) => {
   CarColor2["NEON_YELLOW"] = "#FFD700";
   return CarColor2;
 })(CarColor || {});
+const XP_LEVEL_THRESHOLDS = [
+  0,
+  1e3,
+  2e3,
+  3500,
+  5e3,
+  7e3,
+  9500,
+  12500
+];
+function xpToLevel(xp) {
+  let level = 1;
+  for (let i = 0; i < XP_LEVEL_THRESHOLDS.length; i++) {
+    if (xp >= XP_LEVEL_THRESHOLDS[i]) level = i + 1;
+    else break;
+  }
+  return level;
+}
 const createStoreImpl = (createState) => {
   let state;
   const listeners = /* @__PURE__ */ new Set();
@@ -276,6 +295,15 @@ const persistImpl = (config, baseOptions) => (set, get, api) => {
   return stateFromStorage || configResult;
 };
 const persist = persistImpl;
+const LEVEL_CAR_UNLOCKS = {
+  2: CarType.SPORT,
+  3: CarType.STREET,
+  4: CarType.JET,
+  5: CarType.RACE,
+  6: CarType.SUPER,
+  7: CarType.HYPER,
+  8: CarType.LIGHTNING
+};
 const DEFAULT_PROFILE = {
   xp: 0,
   level: 1,
@@ -339,17 +367,32 @@ const useGameStore = create()(
       addXP: (amount) => {
         const { profile } = get();
         const newXP = profile.xp + amount;
-        const newLevel = Math.floor(newXP / 1e3) + 1;
-        set((s) => ({ profile: { ...s.profile, xp: newXP, level: newLevel } }));
+        const oldLevel = profile.level;
+        const newLevel = xpToLevel(newXP);
+        const newUnlocks = [];
+        for (let lvl = oldLevel + 1; lvl <= newLevel; lvl++) {
+          const carUnlock = LEVEL_CAR_UNLOCKS[lvl];
+          if (carUnlock && !profile.unlockedCars.includes(carUnlock)) {
+            newUnlocks.push(carUnlock);
+          }
+        }
+        const newUnlockedCars = newUnlocks.length > 0 ? [.../* @__PURE__ */ new Set([...profile.unlockedCars, ...newUnlocks])] : profile.unlockedCars;
+        const levelUp = newLevel > oldLevel ? {
+          newLevel,
+          unlockedCar: newUnlocks[newUnlocks.length - 1] ?? null
+        } : null;
+        set((s) => ({
+          profile: {
+            ...s.profile,
+            xp: newXP,
+            level: newLevel,
+            unlockedCars: newUnlockedCars
+          },
+          pendingLevelUp: levelUp ?? s.pendingLevelUp
+        }));
       },
       selectCar: (car) => set((s) => ({ profile: { ...s.profile, selectedCar: car } })),
       selectColor: (color) => set((s) => ({ profile: { ...s.profile, selectedColor: color } })),
-      unlockCar: (car) => set((s) => ({
-        profile: {
-          ...s.profile,
-          unlockedCars: [.../* @__PURE__ */ new Set([...s.profile.unlockedCars, car])]
-        }
-      })),
       unlockMap: (theme) => set((s) => ({
         profile: {
           ...s.profile,
@@ -374,6 +417,9 @@ const useGameStore = create()(
           }
         };
       }),
+      // Level-up event
+      pendingLevelUp: null,
+      dismissLevelUp: () => set({ pendingLevelUp: null }),
       // Game config
       selectedMap: MapTheme.HIGHWAY,
       selectedGameMode: GameMode.SCORE,
@@ -408,18 +454,19 @@ const useGameStore = create()(
       pauseGame: () => set((s) => ({ gameState: { ...s.gameState, isPaused: true } })),
       resumeGame: () => set((s) => ({ gameState: { ...s.gameState, isPaused: false } })),
       endGame: () => {
-        const { gameState, profile } = get();
+        const { gameState, profile, addXP } = get();
         const newHighScore = Math.max(gameState.score, profile.highScore);
+        const earnedXP = Math.floor(gameState.score / 10);
         set((s) => ({
           gameState: { ...s.gameState, isGameOver: true },
           profile: {
             ...s.profile,
             highScore: newHighScore,
             totalCoins: s.profile.totalCoins + gameState.coins,
-            totalRaces: s.profile.totalRaces + 1,
-            xp: s.profile.xp + Math.floor(gameState.score / 10)
+            totalRaces: s.profile.totalRaces + 1
           }
         }));
+        addXP(earnedXP);
       },
       updateGameState: (updates) => set((s) => ({ gameState: { ...s.gameState, ...updates } })),
       changeLane: (direction) => {
@@ -456,6 +503,7 @@ export {
   GameMode as G,
   MapTheme as M,
   PowerUpType as P,
+  XP_LEVEL_THRESHOLDS as X,
   CarType as a,
   useGameStore as u
 };

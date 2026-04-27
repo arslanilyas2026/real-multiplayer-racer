@@ -8,10 +8,24 @@ import {
   CarType,
   GameMode,
   type GameState,
+  type LevelUpEvent,
   MapTheme,
   type PlayerProfile,
   PowerUpType,
+  XP_LEVEL_THRESHOLDS,
+  xpToLevel,
 } from "../types/game";
+
+// Map XP level → car that unlocks at that level
+const LEVEL_CAR_UNLOCKS: Record<number, CarType> = {
+  2: CarType.SPORT,
+  3: CarType.STREET,
+  4: CarType.JET,
+  5: CarType.RACE,
+  6: CarType.SUPER,
+  7: CarType.HYPER,
+  8: CarType.LIGHTNING,
+};
 
 // ── Defaults ─────────────────────────────────────────────────────────────────
 
@@ -72,9 +86,13 @@ interface GameStore {
   addXP: (amount: number) => void;
   selectCar: (car: CarType) => void;
   selectColor: (color: CarColor) => void;
-  unlockCar: (car: CarType) => void;
+  /** Cars auto-unlock via addXP — this is kept for map compatibility only */
   unlockMap: (theme: MapTheme) => void;
   upgradePowerUp: (type: PowerUpType) => void;
+
+  // Level-up event (shown as popup in results/crash screens)
+  pendingLevelUp: LevelUpEvent | null;
+  dismissLevelUp: () => void;
 
   // Game configuration (pre-race selections)
   selectedMap: MapTheme;
@@ -131,20 +149,46 @@ export const useGameStore = create<GameStore>()(
       addXP: (amount) => {
         const { profile } = get();
         const newXP = profile.xp + amount;
-        const newLevel = Math.floor(newXP / 1000) + 1;
-        set((s) => ({ profile: { ...s.profile, xp: newXP, level: newLevel } }));
+        const oldLevel = profile.level;
+        const newLevel = xpToLevel(newXP);
+
+        // Determine cars to auto-unlock for each new level gained
+        const newUnlocks: CarType[] = [];
+        for (let lvl = oldLevel + 1; lvl <= newLevel; lvl++) {
+          const carUnlock = LEVEL_CAR_UNLOCKS[lvl];
+          if (carUnlock && !profile.unlockedCars.includes(carUnlock)) {
+            newUnlocks.push(carUnlock);
+          }
+        }
+
+        const newUnlockedCars =
+          newUnlocks.length > 0
+            ? [...new Set([...profile.unlockedCars, ...newUnlocks])]
+            : profile.unlockedCars;
+
+        // Fire level-up event if leveled up
+        const levelUp: LevelUpEvent | null =
+          newLevel > oldLevel
+            ? {
+                newLevel,
+                unlockedCar: newUnlocks[newUnlocks.length - 1] ?? null,
+              }
+            : null;
+
+        set((s) => ({
+          profile: {
+            ...s.profile,
+            xp: newXP,
+            level: newLevel,
+            unlockedCars: newUnlockedCars,
+          },
+          pendingLevelUp: levelUp ?? s.pendingLevelUp,
+        }));
       },
       selectCar: (car) =>
         set((s) => ({ profile: { ...s.profile, selectedCar: car } })),
       selectColor: (color) =>
         set((s) => ({ profile: { ...s.profile, selectedColor: color } })),
-      unlockCar: (car) =>
-        set((s) => ({
-          profile: {
-            ...s.profile,
-            unlockedCars: [...new Set([...s.profile.unlockedCars, car])],
-          },
-        })),
       unlockMap: (theme) =>
         set((s) => ({
           profile: {
@@ -171,6 +215,10 @@ export const useGameStore = create<GameStore>()(
             },
           };
         }),
+
+      // Level-up event
+      pendingLevelUp: null,
+      dismissLevelUp: () => set({ pendingLevelUp: null }),
 
       // Game config
       selectedMap: MapTheme.HIGHWAY,
@@ -210,8 +258,9 @@ export const useGameStore = create<GameStore>()(
       resumeGame: () =>
         set((s) => ({ gameState: { ...s.gameState, isPaused: false } })),
       endGame: () => {
-        const { gameState, profile } = get();
+        const { gameState, profile, addXP } = get();
         const newHighScore = Math.max(gameState.score, profile.highScore);
+        const earnedXP = Math.floor(gameState.score / 10);
         set((s) => ({
           gameState: { ...s.gameState, isGameOver: true },
           profile: {
@@ -219,9 +268,10 @@ export const useGameStore = create<GameStore>()(
             highScore: newHighScore,
             totalCoins: s.profile.totalCoins + gameState.coins,
             totalRaces: s.profile.totalRaces + 1,
-            xp: s.profile.xp + Math.floor(gameState.score / 10),
           },
         }));
+        // addXP handles level-up detection and car unlocks
+        addXP(earnedXP);
       },
       updateGameState: (updates) =>
         set((s) => ({ gameState: { ...s.gameState, ...updates } })),
@@ -260,3 +310,22 @@ export const useGameStore = create<GameStore>()(
     },
   ),
 );
+
+// ── Selectors ─────────────────────────────────────────────────────────────────
+
+/** XP needed to reach the next level (returns 0 if at max level). */
+export function xpToNextLevel(xp: number): number {
+  const level = xpToLevel(xp);
+  const nextThreshold = XP_LEVEL_THRESHOLDS[level]; // 1-indexed level → index of next
+  if (nextThreshold === undefined) return 0;
+  return nextThreshold - xp;
+}
+
+/** XP progress [0–1] within the current level bracket. */
+export function levelProgress(xp: number): number {
+  const level = xpToLevel(xp);
+  const currentThreshold = XP_LEVEL_THRESHOLDS[level - 1] ?? 0;
+  const nextThreshold = XP_LEVEL_THRESHOLDS[level];
+  if (nextThreshold === undefined) return 1;
+  return (xp - currentThreshold) / (nextThreshold - currentThreshold);
+}

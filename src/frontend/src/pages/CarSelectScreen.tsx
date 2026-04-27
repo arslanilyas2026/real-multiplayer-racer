@@ -2,100 +2,461 @@ import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { CAR_CATALOG } from "../data/cars";
 import { useGameStore } from "../store/gameStore";
-import { CarColor, type CarType } from "../types/game";
+import { CarColor, type CarType, XP_LEVEL_THRESHOLDS } from "../types/game";
 
-// ── Car visual config ─────────────────────────────────────────────────────────
-
-const CAR_EMOJIS: Record<string, string> = {
-  BASIC: "🚗",
-  SPORT: "🏎️",
-  STREET: "🚙",
-  JET: "✈️",
-  RACE: "🏁",
-  HYPER: "⚡",
-  LIGHTNING: "🌩️",
-};
-
-// Each car has a unique accent neon color for its stat bars & glow
 const CAR_ACCENT: Record<string, string> = {
   BASIC: "#00D4AA",
   SPORT: "#FF6B2B",
   STREET: "#B44FFF",
   JET: "#00BFFF",
   RACE: "#FF3EA5",
+  SUPER: "#FF6B2B",
   HYPER: "#FFD700",
   LIGHTNING: "#7DF9FF",
 };
 
 const NEON_COLORS: { value: CarColor; label: string; hex: string }[] = [
-  { value: CarColor.NEON_ORANGE, label: "Blaze", hex: "#FF6B2B" },
-  { value: CarColor.NEON_CYAN, label: "Teal", hex: "#00D4AA" },
-  { value: CarColor.NEON_PURPLE, label: "Volt", hex: "#B44FFF" },
-  { value: CarColor.NEON_YELLOW, label: "Gold", hex: "#FFD700" },
+  { value: CarColor.NEON_ORANGE, label: "BLAZE", hex: "#FF6B2B" },
+  { value: CarColor.NEON_CYAN, label: "TEAL", hex: "#00D4AA" },
+  { value: CarColor.NEON_PURPLE, label: "VOLT", hex: "#B44FFF" },
+  { value: CarColor.NEON_YELLOW, label: "GOLD", hex: "#FFD700" },
 ];
 
 const STAT_COLORS = ["#FF6B2B", "#00D4AA", "#B44FFF"];
-const STAT_LABELS = ["SPEED", "HANDLING", "ACCELERATION"];
+const STAT_LABELS = ["SPEED", "HANDLING", "ACCEL"];
 
-// ── Sub-components ────────────────────────────────────────────────────────────
+function xpForLevel(level: number): number {
+  return XP_LEVEL_THRESHOLDS[level - 1] ?? 0;
+}
+
+function hexToRgb(hex: string): string {
+  const r = Number.parseInt(hex.slice(1, 3), 16);
+  const g = Number.parseInt(hex.slice(3, 5), 16);
+  const b = Number.parseInt(hex.slice(5, 7), 16);
+  return `${r},${g},${b}`;
+}
 
 function StatBar({
   label,
   value,
   color,
-  max = 10,
-}: {
-  label: string;
-  value: number;
-  color: string;
-  max?: number;
-}) {
-  const pct = Math.min(100, (value / max) * 100);
+}: { label: string; value: number; color: string }) {
+  const pct = Math.min(100, (value / 10) * 100);
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-2">
       <span
-        className="text-xs font-display font-bold tracking-widest uppercase w-28 shrink-0"
-        style={{ color: "#7A9BB5" }}
+        className="w-14 shrink-0 font-display font-bold uppercase"
+        style={{ color: "#7A9BB5", fontSize: "0.63rem" }}
       >
         {label}
       </span>
       <div
-        className="flex-1 h-3 rounded-full overflow-hidden"
+        className="flex-1 h-2 rounded-full overflow-hidden"
         style={{ background: "rgba(255,255,255,0.07)" }}
       >
         <div
-          className="h-full rounded-full transition-all duration-500"
+          className="h-full rounded-full"
           style={{
             width: `${pct}%`,
-            background: `linear-gradient(90deg, ${color}cc, ${color})`,
-            boxShadow: `0 0 8px ${color}88`,
+            background: `linear-gradient(90deg,${color}cc,${color})`,
+            boxShadow: `0 0 5px ${color}88`,
+            transition: "width 0.5s",
           }}
         />
       </div>
       <span
-        className="text-sm font-display font-black w-6 text-right shrink-0"
-        style={{ color }}
+        className="w-5 text-right shrink-0 font-display font-black"
+        style={{ color, fontSize: "0.68rem" }}
       >
-        {value * 10}
+        {value}
       </span>
     </div>
   );
 }
 
-// ── Main screen ───────────────────────────────────────────────────────────────
+// ── Top-down canvas car illustration ─────────────────────────────────────────
+function CarIllustration({
+  carType,
+  color,
+  accentColor,
+  size = 110,
+  locked = false,
+}: {
+  carType: string;
+  color: string;
+  accentColor: string;
+  size?: number;
+  locked?: boolean;
+}) {
+  const w = size * 0.32;
+  const h = size * 0.55;
+  const ref = (canvas: HTMLCanvasElement | null) => {
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.clearRect(0, 0, size, size);
+    if (locked) ctx.globalAlpha = 0.35;
+    drawCar(ctx, size / 2, size / 2, carType, color, accentColor, w, h);
+  };
+  return (
+    <canvas ref={ref} width={size} height={size} style={{ display: "block" }} />
+  );
+}
 
+function drawCar(
+  ctx: CanvasRenderingContext2D,
+  cx: number,
+  cy: number,
+  type: string,
+  body: string,
+  accent: string,
+  w: number,
+  h: number,
+) {
+  ctx.save();
+  ctx.translate(cx, cy);
+  const hw = w / 2;
+  const hh = h / 2;
+
+  // ── Body shape per car type ───────────────────────────────────────────────
+  if (type === "RACE") {
+    ctx.fillStyle = body;
+    ctx.beginPath();
+    ctx.moveTo(-hw * 0.38, -hh);
+    ctx.lineTo(hw * 0.38, -hh);
+    ctx.lineTo(hw * 0.25, hh);
+    ctx.lineTo(-hw * 0.25, hh);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = accent;
+    ctx.globalAlpha = 0.9;
+    for (const [x1, x2] of [
+      [-hw * 0.38, -hw],
+      [hw * 0.38, hw],
+    ] as [number, number][]) {
+      ctx.beginPath();
+      ctx.moveTo(x1, -hh + h * 0.12);
+      ctx.lineTo(x2, -hh + h * 0.12);
+      ctx.lineTo(x2, -hh + h * 0.22);
+      ctx.lineTo(x1, -hh + h * 0.22);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.beginPath();
+    (
+      ctx as CanvasRenderingContext2D & { roundRect: (...a: number[]) => void }
+    ).roundRect(-hw * 0.55, hh - h * 0.1, hw * 1.1, h * 0.1, 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = "rgba(100,200,255,0.8)";
+    ctx.beginPath();
+    ctx.ellipse(0, -hh * 0.2, hw * 0.22, hh * 0.32, 0, 0, Math.PI * 2);
+    ctx.fill();
+  } else if (type === "JET") {
+    ctx.fillStyle = body;
+    ctx.beginPath();
+    ctx.moveTo(0, -hh - h * 0.08);
+    ctx.lineTo(hw * 0.72, -hh + h * 0.22);
+    ctx.lineTo(hw * 0.62, hh);
+    ctx.lineTo(-hw * 0.62, hh);
+    ctx.lineTo(-hw * 0.72, -hh + h * 0.22);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = accent;
+    ctx.globalAlpha = 0.7;
+    ctx.beginPath();
+    ctx.moveTo(hw * 0.72, -hh + h * 0.22);
+    ctx.lineTo(hw, 0);
+    ctx.lineTo(hw * 0.62, hh);
+    ctx.closePath();
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(-hw * 0.72, -hh + h * 0.22);
+    ctx.lineTo(-hw, 0);
+    ctx.lineTo(-hw * 0.62, hh);
+    ctx.closePath();
+    ctx.fill();
+    for (const ex of [-hw * 0.3, 0, hw * 0.3]) {
+      ctx.beginPath();
+      ctx.ellipse(ex, hh - h * 0.04, hw * 0.12, hh * 0.08, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = "rgba(100,200,255,0.75)";
+    ctx.beginPath();
+    ctx.ellipse(0, -hh * 0.25, hw * 0.35, hh * 0.28, 0, 0, Math.PI * 2);
+    ctx.fill();
+  } else if (type === "HYPER") {
+    const r = hw * 0.15;
+    ctx.fillStyle = body;
+    ctx.beginPath();
+    ctx.moveTo(-hw + r, -hh);
+    ctx.lineTo(hw - r, -hh);
+    ctx.quadraticCurveTo(hw, -hh, hw, -hh + r);
+    ctx.lineTo(hw * 0.92, hh - r);
+    ctx.quadraticCurveTo(hw * 0.92, hh, hw * 0.92 - r, hh);
+    ctx.lineTo(-hw * 0.92 + r, hh);
+    ctx.quadraticCurveTo(-hw * 0.92, hh, -hw * 0.92, hh - r);
+    ctx.lineTo(-hw, -hh + r);
+    ctx.quadraticCurveTo(-hw, -hh, -hw + r, -hh);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = accent;
+    ctx.globalAlpha = 0.9;
+    ctx.fillRect(-hw, -hh, w, h * 0.06);
+    ctx.fillStyle = "rgba(0,0,0,0.6)";
+    ctx.beginPath();
+    (
+      ctx as CanvasRenderingContext2D & { roundRect: (...a: number[]) => void }
+    ).roundRect(-hw + hw * 0.05, -hh * 0.3, hw * 0.22, hh * 0.4, 3);
+    ctx.fill();
+    ctx.beginPath();
+    (
+      ctx as CanvasRenderingContext2D & { roundRect: (...a: number[]) => void }
+    ).roundRect(hw * 0.73, -hh * 0.3, hw * 0.22, hh * 0.4, 3);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = "rgba(100,200,255,0.75)";
+    ctx.beginPath();
+    (
+      ctx as CanvasRenderingContext2D & { roundRect: (...a: number[]) => void }
+    ).roundRect(-hw * 0.62, -hh + h * 0.18, hw * 1.24, hh * 0.28, 4);
+    ctx.fill();
+    ctx.fillStyle = "rgba(0,0,0,0.45)";
+    ctx.beginPath();
+    (
+      ctx as CanvasRenderingContext2D & { roundRect: (...a: number[]) => void }
+    ).roundRect(-hw * 0.58, -hh * 0.1, hw * 1.16, hh * 0.4, 5);
+    ctx.fill();
+  } else if (type === "LIGHTNING") {
+    ctx.fillStyle = body;
+    ctx.beginPath();
+    ctx.moveTo(0, -hh);
+    ctx.lineTo(hw * 0.82, -hh + h * 0.18);
+    ctx.lineTo(hw, -hh + h * 0.38);
+    ctx.lineTo(hw * 0.72, hh * 0.35);
+    ctx.lineTo(hw * 0.88, hh);
+    ctx.lineTo(-hw * 0.88, hh);
+    ctx.lineTo(-hw * 0.72, hh * 0.35);
+    ctx.lineTo(-hw, -hh + h * 0.38);
+    ctx.lineTo(-hw * 0.82, -hh + h * 0.18);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = accent;
+    ctx.lineWidth = hw * 0.12;
+    ctx.lineCap = "round";
+    ctx.globalAlpha = 0.85;
+    ctx.beginPath();
+    ctx.moveTo(-hw * 0.15, -hh * 0.6);
+    ctx.lineTo(hw * 0.05, -hh * 0.05);
+    ctx.lineTo(-hw * 0.18, hh * 0.1);
+    ctx.lineTo(hw * 0.15, hh * 0.6);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = "rgba(100,200,255,0.75)";
+    ctx.beginPath();
+    ctx.moveTo(-hw * 0.55, -hh + h * 0.2);
+    ctx.lineTo(hw * 0.55, -hh + h * 0.2);
+    ctx.lineTo(hw * 0.42, -hh + h * 0.42);
+    ctx.lineTo(-hw * 0.42, -hh + h * 0.42);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = "rgba(0,0,0,0.45)";
+    ctx.beginPath();
+    (
+      ctx as CanvasRenderingContext2D & { roundRect: (...a: number[]) => void }
+    ).roundRect(-hw * 0.5, -hh * 0.02, hw * 1.0, hh * 0.38, 4);
+    ctx.fill();
+  } else if (type === "STREET") {
+    const r = hw * 0.18;
+    ctx.fillStyle = body;
+    ctx.beginPath();
+    ctx.moveTo(-hw + r, -hh + h * 0.1);
+    ctx.quadraticCurveTo(-hw, -hh + h * 0.1, -hw, -hh + h * 0.18);
+    ctx.lineTo(-hw * 0.95, hh - r);
+    ctx.quadraticCurveTo(-hw * 0.95, hh, -hw * 0.95 + r, hh);
+    ctx.lineTo(hw * 0.95 - r, hh);
+    ctx.quadraticCurveTo(hw * 0.95, hh, hw * 0.95, hh - r);
+    ctx.lineTo(hw, -hh + h * 0.18);
+    ctx.quadraticCurveTo(hw, -hh + h * 0.1, hw - r, -hh + h * 0.1);
+    ctx.lineTo(hw * 0.55, -hh);
+    ctx.lineTo(-hw * 0.55, -hh);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = "rgba(0,0,0,0.8)";
+    ctx.beginPath();
+    (
+      ctx as CanvasRenderingContext2D & { roundRect: (...a: number[]) => void }
+    ).roundRect(-hw * 0.68, -hh + h * 0.22, hw * 1.36, hh * 0.3, 3);
+    ctx.fill();
+    ctx.fillStyle = "rgba(0,0,0,0.65)";
+    ctx.beginPath();
+    (
+      ctx as CanvasRenderingContext2D & { roundRect: (...a: number[]) => void }
+    ).roundRect(-hw * 0.6, -hh * 0.06, hw * 1.2, hh * 0.42, 4);
+    ctx.fill();
+    ctx.fillStyle = accent;
+    ctx.globalAlpha = 0.7;
+    ctx.fillRect(-hw * 0.95, -hh * 0.04, hw * 1.9, hh * 0.1);
+    ctx.globalAlpha = 1;
+  } else if (type === "SPORT") {
+    const fw = hw * 0.88;
+    const rw = hw * 0.72;
+    ctx.fillStyle = body;
+    ctx.beginPath();
+    ctx.moveTo(-fw + hw * 0.2, -hh);
+    ctx.lineTo(fw - hw * 0.2, -hh);
+    ctx.quadraticCurveTo(fw, -hh, fw, -hh + h * 0.08);
+    ctx.lineTo(fw * 0.85, hh * 0.65);
+    ctx.lineTo(rw, hh);
+    ctx.lineTo(-rw, hh);
+    ctx.lineTo(-fw * 0.85, hh * 0.65);
+    ctx.lineTo(-fw, -hh + h * 0.08);
+    ctx.quadraticCurveTo(-fw, -hh, -fw + hw * 0.2, -hh);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = "rgba(100,200,255,0.78)";
+    ctx.beginPath();
+    ctx.moveTo(-fw * 0.75, -hh + h * 0.2);
+    ctx.lineTo(fw * 0.75, -hh + h * 0.2);
+    ctx.lineTo(fw * 0.62, -hh + h * 0.44);
+    ctx.lineTo(-fw * 0.62, -hh + h * 0.44);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = "rgba(0,0,0,0.42)";
+    ctx.beginPath();
+    (
+      ctx as CanvasRenderingContext2D & { roundRect: (...a: number[]) => void }
+    ).roundRect(-hw * 0.55, -hh * 0.05, hw * 1.1, hh * 0.42, 4);
+    ctx.fill();
+    ctx.fillStyle = accent;
+    ctx.globalAlpha = 0.9;
+    ctx.beginPath();
+    (
+      ctx as CanvasRenderingContext2D & { roundRect: (...a: number[]) => void }
+    ).roundRect(-rw * 0.82, hh * 0.72, rw * 1.64, hh * 0.14, 3);
+    ctx.fill();
+    ctx.fillRect(-rw * 0.28, hh * 0.58, rw * 0.14, hh * 0.18);
+    ctx.fillRect(rw * 0.14, hh * 0.58, rw * 0.14, hh * 0.18);
+    ctx.globalAlpha = 1;
+  } else {
+    // BASIC / SUPER
+    const fw = hw * 0.86;
+    const rw = hw * 0.76;
+    const r = hw * 0.22;
+    ctx.fillStyle = body;
+    ctx.beginPath();
+    ctx.moveTo(-fw + r, -hh);
+    ctx.lineTo(fw - r, -hh);
+    ctx.quadraticCurveTo(fw, -hh, fw, -hh + r);
+    ctx.lineTo(fw * 0.9, hh * 0.7);
+    ctx.lineTo(rw, hh);
+    ctx.lineTo(-rw, hh);
+    ctx.lineTo(-fw * 0.9, hh * 0.7);
+    ctx.lineTo(-fw, -hh + r);
+    ctx.quadraticCurveTo(-fw, -hh, -fw + r, -hh);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = "rgba(100,200,255,0.78)";
+    ctx.beginPath();
+    (
+      ctx as CanvasRenderingContext2D & { roundRect: (...a: number[]) => void }
+    ).roundRect(-fw * 0.72, -hh + h * 0.2, fw * 1.44, hh * 0.28, 3);
+    ctx.fill();
+    ctx.fillStyle = "rgba(0,0,0,0.4)";
+    ctx.beginPath();
+    (
+      ctx as CanvasRenderingContext2D & { roundRect: (...a: number[]) => void }
+    ).roundRect(-hw * 0.58, -hh * 0.06, hw * 1.16, hh * 0.42, 4);
+    ctx.fill();
+    ctx.fillStyle = "rgba(100,190,255,0.45)";
+    ctx.beginPath();
+    (
+      ctx as CanvasRenderingContext2D & { roundRect: (...a: number[]) => void }
+    ).roundRect(-rw * 0.7, hh * 0.35, rw * 1.4, hh * 0.2, 3);
+    ctx.fill();
+  }
+
+  // ── Wheels ────────────────────────────────────────────────────────────────
+  const wr = w * 0.16;
+  const wxOff = hw * 0.88;
+  const wyF = -hh + h * 0.24;
+  const wyR = hh * 0.68;
+  for (const [wc, wy] of [
+    [-wxOff, wyF],
+    [wxOff, wyF],
+    [-wxOff, wyR],
+    [wxOff, wyR],
+  ] as [number, number][]) {
+    ctx.fillStyle = "rgba(0,0,0,0.4)";
+    ctx.beginPath();
+    ctx.ellipse(wc + 1, wy + 2, wr, wr * 0.76, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#0d0d1a";
+    ctx.beginPath();
+    ctx.ellipse(wc, wy, wr, wr * 0.76, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#7a7a8a";
+    ctx.beginPath();
+    ctx.arc(wc, wy, wr * 0.52, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#b0b0c0";
+    ctx.beginPath();
+    ctx.arc(wc, wy, wr * 0.26, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // ── Headlights FRONT (yellow, top) ───────────────────────────────────────
+  const hlY = -hh + h * 0.055;
+  const hlXs =
+    type === "RACE" ? hw * 0.22 : type === "JET" ? hw * 0.38 : hw * 0.6;
+  const hlR = w * 0.1;
+  for (const hx of [-hlXs, hlXs]) {
+    ctx.fillStyle = "rgba(255,240,80,0.55)";
+    ctx.beginPath();
+    ctx.arc(hx, hlY, hlR * 1.7, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#FFE44D";
+    ctx.beginPath();
+    ctx.ellipse(hx, hlY, hlR, hlR * 0.65, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#FFFFFF";
+    ctx.beginPath();
+    ctx.arc(hx, hlY, hlR * 0.4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // ── Taillights REAR (red, bottom) ────────────────────────────────────────
+  const tlY = hh - h * 0.055;
+  const tlXs = type === "RACE" ? hw * 0.22 : hw * 0.52;
+  const tlR = w * 0.09;
+  for (const tx of [-tlXs, tlXs]) {
+    ctx.fillStyle = "rgba(255,20,20,0.5)";
+    ctx.beginPath();
+    ctx.arc(tx, tlY, tlR * 1.6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#FF1A1A";
+    ctx.beginPath();
+    ctx.ellipse(tx, tlY, tlR, tlR * 0.62, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#FF8080";
+    ctx.beginPath();
+    ctx.arc(tx, tlY, tlR * 0.36, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
+
+// ── Main component ────────────────────────────────────────────────────────────
 export default function CarSelectScreen() {
   const navigate = useNavigate();
-  const { profile, selectCar, selectColor, spendCoins, unlockCar } =
-    useGameStore();
+  const { profile, selectCar, selectColor } = useGameStore();
 
-  // Find initial index based on equipped car
   const initialIdx = CAR_CATALOG.findIndex(
     (c) => c.type === profile.selectedCar,
   );
   const [carIdx, setCarIdx] = useState(initialIdx >= 0 ? initialIdx : 0);
-  const [shaking, setShaking] = useState(false);
-  const [insufficientCoins, setInsufficientCoins] = useState(false);
   const [slideDir, setSlideDir] = useState<"left" | "right" | null>(null);
   const [animKey, setAnimKey] = useState(0);
 
@@ -104,8 +465,11 @@ export default function CarSelectScreen() {
   const isUnlocked = profile.unlockedCars.includes(car.type as CarType);
   const isEquipped = profile.selectedCar === car.type;
   const totalCars = CAR_CATALOG.length;
+  const carColorHex =
+    NEON_COLORS.find((c) => c.value === profile.selectedColor)?.hex ??
+    "#FF6B2B";
 
-  function navigate_car(dir: "prev" | "next") {
+  function navigateCar(dir: "prev" | "next") {
     const newIdx =
       dir === "next"
         ? (carIdx + 1) % totalCars
@@ -115,117 +479,42 @@ export default function CarSelectScreen() {
     setCarIdx(newIdx);
   }
 
-  function handleUnlock() {
-    if (isUnlocked) return;
-    if (!spendCoins(car.unlockCost)) {
-      setShaking(true);
-      setInsufficientCoins(true);
-      setTimeout(() => setShaking(false), 500);
-      setTimeout(() => setInsufficientCoins(false), 1500);
-      return;
-    }
-    unlockCar(car.type as CarType);
-    selectCar(car.type as CarType);
-  }
-
-  function handleConfirm() {
-    if (isUnlocked) {
-      selectCar(car.type as CarType);
-      navigate({ to: "/menu" });
-    } else {
-      handleUnlock();
-    }
-  }
-
-  // Button style based on state
-  const btnStyle: React.CSSProperties = isEquipped
-    ? {
-        background: "linear-gradient(135deg, #00D4AA, #00AA88)",
-        color: "#0D1B2A",
-        boxShadow: "0 0 28px #00D4AA66, 0 4px 16px #00000088",
-      }
-    : isUnlocked
-      ? {
-          background: "linear-gradient(135deg, #FF6B2B, #FF9F1C)",
-          color: "#0D1B2A",
-          boxShadow: "0 0 28px #FF6B2B66, 0 4px 16px #00000088",
-        }
-      : {
-          background: "linear-gradient(135deg, #1A2740, #1F3050)",
-          color: "#4A6A8A",
-          boxShadow: "none",
-          border: "1.5px solid #243050",
-        };
-
   return (
     <div
       className="fixed inset-0 flex flex-col overflow-hidden"
       style={{ background: "#0D1B2A" }}
       data-ocid="car_select.page"
     >
-      {/* Diagonal stripe texture overlay */}
       <div
-        className="absolute inset-0 pointer-events-none"
+        className="absolute top-12 left-1/2 -translate-x-1/2 pointer-events-none"
         style={{
-          backgroundImage:
-            "repeating-linear-gradient(135deg, rgba(255,255,255,0.018) 0px, rgba(255,255,255,0.018) 1px, transparent 1px, transparent 28px)",
-          zIndex: 0,
-        }}
-      />
-
-      {/* Radial glow behind car area */}
-      <div
-        className="absolute top-0 left-1/2 -translate-x-1/2 pointer-events-none transition-all duration-500"
-        style={{
-          width: "340px",
-          height: "340px",
+          width: "260px",
+          height: "260px",
           borderRadius: "50%",
-          background: `radial-gradient(circle, ${accentColor}22 0%, transparent 70%)`,
-          zIndex: 0,
-          top: "60px",
+          background: `radial-gradient(circle, ${accentColor}1c 0%, transparent 70%)`,
         }}
       />
 
       <style>{`
-        @keyframes slide-left {
-          from { opacity: 0; transform: translateX(60px) scale(0.92); }
-          to   { opacity: 1; transform: translateX(0) scale(1); }
-        }
-        @keyframes slide-right {
-          from { opacity: 0; transform: translateX(-60px) scale(0.92); }
-          to   { opacity: 1; transform: translateX(0) scale(1); }
-        }
-        @keyframes shake {
-          0%,100% { transform: translateX(0); }
-          15%  { transform: translateX(-10px); }
-          30%  { transform: translateX(10px); }
-          50%  { transform: translateX(-7px); }
-          70%  { transform: translateX(7px); }
-          90%  { transform: translateX(-3px); }
-        }
-        @keyframes badge-pop {
-          0% { transform: scale(0.7); opacity: 0; }
-          60% { transform: scale(1.12); }
-          100% { transform: scale(1); opacity: 1; }
-        }
-        .car-enter-left  { animation: slide-left  0.38s cubic-bezier(0.22,1,0.36,1) both; }
-        .car-enter-right { animation: slide-right 0.38s cubic-bezier(0.22,1,0.36,1) both; }
-        .shake-anim      { animation: shake 0.45s cubic-bezier(0.36,0.07,0.19,0.97); }
-        .badge-pop       { animation: badge-pop 0.3s cubic-bezier(0.22,1,0.36,1) both; }
-        .arrow-btn:active { transform: scale(0.88); }
+        @keyframes slide-left  { from{opacity:0;transform:translateX(50px) scale(0.93);}to{opacity:1;transform:none;} }
+        @keyframes slide-right { from{opacity:0;transform:translateX(-50px) scale(0.93);}to{opacity:1;transform:none;} }
+        @keyframes badge-pop   { 0%{transform:scale(0.7);opacity:0;}60%{transform:scale(1.12);}100%{transform:scale(1);opacity:1;} }
+        .car-enter-left  { animation:slide-left 0.32s cubic-bezier(0.22,1,0.36,1) both; }
+        .car-enter-right { animation:slide-right 0.32s cubic-bezier(0.22,1,0.36,1) both; }
+        .badge-pop       { animation:badge-pop 0.3s cubic-bezier(0.22,1,0.36,1) both; }
       `}</style>
 
-      {/* ── TOP NAV BAR ─────────────────────────────────────────────────────── */}
+      {/* Nav */}
       <div
-        className="relative z-10 flex items-center justify-between px-5 py-4 shrink-0"
+        className="flex items-center justify-between px-4 py-3 shrink-0"
         style={{
           borderBottom: "1px solid rgba(255,255,255,0.06)",
-          background: "rgba(10,15,26,0.7)",
+          background: "rgba(10,15,26,0.9)",
         }}
       >
         <button
           type="button"
-          className="flex items-center gap-2 px-3 py-2 rounded-xl font-display font-bold text-sm uppercase tracking-wider active:scale-95 transition-smooth"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-display font-bold text-xs uppercase tracking-wider active:scale-95"
           style={{
             color: "#7A9BB5",
             background: "rgba(255,255,255,0.04)",
@@ -236,168 +525,121 @@ export default function CarSelectScreen() {
         >
           ← Back
         </button>
-
         <h1
-          className="font-display font-black text-sm tracking-[0.2em] uppercase"
+          className="font-display font-black text-sm tracking-[0.18em] uppercase"
           style={{ color: "#FFFFFF" }}
         >
-          SELECT YOUR CAR
+          SELECT CAR
         </h1>
-
-        {/* Coin display */}
         <div
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl"
+          className="px-2.5 py-1.5 rounded-xl"
           style={{
-            background: "rgba(255,215,0,0.08)",
-            border: `1px solid ${insufficientCoins ? "#FF4444" : "rgba(255,215,0,0.2)"}`,
-            transition: "border-color 0.2s",
+            background: "rgba(255,107,43,0.12)",
+            border: "1px solid rgba(255,107,43,0.3)",
           }}
         >
-          <span style={{ color: "#FFD700", fontSize: "14px" }}>🪙</span>
           <span
-            className="font-display font-black text-sm"
-            style={{ color: "#FFD700" }}
+            className="font-display font-black text-xs"
+            style={{ color: "#FF6B2B" }}
           >
-            {profile.totalCoins.toLocaleString()}
+            LVL {profile.level}
           </span>
         </div>
       </div>
 
-      {/* ── INSUFFICIENT COINS TOAST ──────────────────────────────────────── */}
-      {insufficientCoins && (
-        <div
-          className="relative z-20 mx-5 mt-2 px-4 py-2 rounded-xl text-center font-display font-bold text-xs uppercase tracking-wider badge-pop"
-          style={{
-            background: "rgba(255,68,68,0.15)",
-            color: "#FF6666",
-            border: "1px solid rgba(255,68,68,0.3)",
-          }}
-        >
-          ⚠️ Not enough coins to unlock!
-        </div>
-      )}
-
-      {/* ── MAIN CONTENT: scrollable to handle small screens ─────────────── */}
-      <div className="relative z-10 flex flex-col flex-1 overflow-y-auto px-5 pt-4 pb-2">
-        {/* ── CAR DISPLAY AREA ──────────────────────────────────────────────── */}
-        <div className="flex items-center justify-between gap-2 mb-4">
-          {/* Left arrow */}
+      {/* Scrollable content */}
+      <div className="flex flex-col flex-1 overflow-y-auto px-4 pt-3 pb-2">
+        {/* Car display */}
+        <div className="flex items-center justify-between gap-2 mb-3">
           <button
             type="button"
-            className="arrow-btn shrink-0 w-12 h-12 rounded-full flex items-center justify-center font-display font-black text-lg active:scale-90 transition-smooth"
+            className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-display font-black text-base active:scale-90"
             style={{
               background: "rgba(255,255,255,0.06)",
               border: `2px solid ${accentColor}55`,
               color: accentColor,
-              boxShadow: `0 0 12px ${accentColor}22`,
-              transition: "all 0.2s",
             }}
-            onClick={() => navigate_car("prev")}
+            onClick={() => navigateCar("prev")}
             data-ocid="car_select.prev_button"
             aria-label="Previous car"
           >
             ◀
           </button>
 
-          {/* Car panel */}
           <div
-            key={`car-panel-${animKey}`}
-            className={`flex-1 flex flex-col items-center justify-center rounded-3xl py-7 px-4 relative overflow-hidden ${
-              slideDir === "left" ? "car-enter-left" : "car-enter-right"
-            } ${shaking ? "shake-anim" : ""}`}
+            key={`car-${animKey}`}
+            className={`flex-1 flex flex-col items-center justify-center rounded-2xl py-4 px-3 relative overflow-hidden ${slideDir === "left" ? "car-enter-left" : "car-enter-right"}`}
             style={{
-              background: `linear-gradient(160deg, rgba(255,255,255,0.04) 0%, rgba(${hexToRgb(accentColor)},0.08) 100%)`,
+              background: `linear-gradient(160deg,rgba(255,255,255,0.03) 0%,rgba(${hexToRgb(accentColor)},0.07) 100%)`,
               border: `1.5px solid ${accentColor}44`,
-              boxShadow: `0 0 40px ${accentColor}1A, inset 0 0 30px ${accentColor}0A`,
-              minHeight: "220px",
+              minHeight: "158px",
             }}
           >
-            {/* Status badge */}
             {isEquipped && (
               <div
-                className="absolute top-3 right-3 px-2.5 py-1 rounded-lg font-display font-black text-xs tracking-widest uppercase badge-pop"
+                className="absolute top-2 right-2 px-2 py-0.5 rounded-lg font-display font-black uppercase badge-pop"
                 style={{
-                  background: "linear-gradient(135deg, #00D4AA, #00AA88)",
+                  background: "linear-gradient(135deg,#00D4AA,#00AA88)",
                   color: "#0D1B2A",
-                  boxShadow: "0 0 12px #00D4AA66",
+                  fontSize: "0.56rem",
                 }}
               >
                 EQUIPPED
               </div>
             )}
-            {!isEquipped && isUnlocked && (
-              <div
-                className="absolute top-3 right-3 px-2.5 py-1 rounded-lg font-display font-bold text-xs tracking-widest uppercase badge-pop"
-                style={{
-                  background: "rgba(0,212,170,0.12)",
-                  color: "#00D4AA",
-                  border: "1px solid rgba(0,212,170,0.35)",
-                }}
-              >
-                ✓ OWNED
-              </div>
-            )}
             {!isUnlocked && (
               <div
-                className="absolute top-3 right-3 px-2.5 py-1 rounded-lg font-display font-bold text-xs tracking-widest uppercase badge-pop"
+                className="absolute top-2 right-2 px-2 py-0.5 rounded-lg font-display font-bold uppercase badge-pop"
                 style={{
                   background: "rgba(255,68,68,0.12)",
                   color: "#FF6666",
                   border: "1px solid rgba(255,68,68,0.3)",
+                  fontSize: "0.56rem",
                 }}
               >
                 🔒 LOCKED
               </div>
             )}
-
-            {/* Lock overlay on car */}
-            {!isUnlocked && (
-              <div
-                className="absolute inset-0 rounded-3xl flex flex-col items-center justify-center gap-2"
-                style={{
-                  background: "rgba(5,10,20,0.55)",
-                  backdropFilter: "blur(1px)",
-                  zIndex: 2,
-                }}
-              >
-                <span style={{ fontSize: "2.5rem" }}>🔒</span>
-                <span
-                  className="font-display font-black text-sm tracking-wider"
-                  style={{ color: "#FFD700" }}
-                >
-                  🪙 {car.unlockCost.toLocaleString()} to unlock
-                </span>
-              </div>
-            )}
-
-            {/* Car emoji — large, centered */}
             <div
-              className="flex items-center justify-center"
               style={{
-                fontSize: "clamp(5rem, 18vw, 7.5rem)",
                 filter: isUnlocked
-                  ? `drop-shadow(0 0 18px ${accentColor}) drop-shadow(0 0 36px ${accentColor}88)`
-                  : "grayscale(0.5) opacity(0.5)",
-                transition: "filter 0.4s",
-                lineHeight: 1,
+                  ? `drop-shadow(0 0 12px ${accentColor}) drop-shadow(0 0 22px ${accentColor}44)`
+                  : "grayscale(0.4) opacity(0.5)",
               }}
             >
-              {CAR_EMOJIS[car.type] ?? car.emoji}
+              <CarIllustration
+                carType={car.type}
+                color={carColorHex}
+                accentColor={accentColor}
+                size={106}
+                locked={!isUnlocked}
+              />
+            </div>
+            <div className="mt-1.5 text-center">
+              <h2
+                className="font-display font-black text-xl tracking-[0.1em] uppercase"
+                style={{
+                  color: isUnlocked ? accentColor : "#4A6A8A",
+                  textShadow: isUnlocked ? `0 0 14px ${accentColor}44` : "none",
+                }}
+              >
+                {car.displayName}
+              </h2>
+              <p className="text-xs mt-0.5" style={{ color: "#5A7A99" }}>
+                {car.description}
+              </p>
             </div>
           </div>
 
-          {/* Right arrow */}
           <button
             type="button"
-            className="arrow-btn shrink-0 w-12 h-12 rounded-full flex items-center justify-center font-display font-black text-lg active:scale-90 transition-smooth"
+            className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-display font-black text-base active:scale-90"
             style={{
               background: "rgba(255,255,255,0.06)",
               border: `2px solid ${accentColor}55`,
               color: accentColor,
-              boxShadow: `0 0 12px ${accentColor}22`,
-              transition: "all 0.2s",
             }}
-            onClick={() => navigate_car("next")}
+            onClick={() => navigateCar("next")}
             data-ocid="car_select.next_button"
             aria-label="Next car"
           >
@@ -405,20 +647,20 @@ export default function CarSelectScreen() {
           </button>
         </div>
 
-        {/* Dot indicators */}
-        <div className="flex items-center justify-center gap-2 mb-5">
+        {/* Dots */}
+        <div className="flex items-center justify-center gap-1.5 mb-3">
           {CAR_CATALOG.map((c, i) => (
             <button
               key={c.type}
               type="button"
-              className="transition-all duration-300"
               style={{
-                width: i === carIdx ? "20px" : "7px",
-                height: "7px",
-                borderRadius: "4px",
+                width: i === carIdx ? "14px" : "5px",
+                height: "5px",
+                borderRadius: "3px",
                 background:
                   i === carIdx ? accentColor : "rgba(255,255,255,0.18)",
-                boxShadow: i === carIdx ? `0 0 8px ${accentColor}` : "none",
+                boxShadow: i === carIdx ? `0 0 5px ${accentColor}` : "none",
+                transition: "all 0.3s",
               }}
               onClick={() => {
                 setSlideDir(i > carIdx ? "left" : "right");
@@ -431,26 +673,9 @@ export default function CarSelectScreen() {
           ))}
         </div>
 
-        {/* ── CAR INFO ──────────────────────────────────────────────────────── */}
-        <div className="mb-5 text-center">
-          <h2
-            className="font-display font-black text-2xl tracking-[0.12em] uppercase mb-1"
-            style={{
-              color: isUnlocked ? accentColor : "#4A6A8A",
-              textShadow: isUnlocked ? `0 0 20px ${accentColor}66` : "none",
-              transition: "color 0.3s, text-shadow 0.3s",
-            }}
-          >
-            {car.displayName}
-          </h2>
-          <p className="text-sm" style={{ color: "#5A7A99" }}>
-            {car.description}
-          </p>
-        </div>
-
-        {/* ── STAT BARS ──────────────────────────────────────────────────────── */}
+        {/* Stats */}
         <div
-          className="rounded-2xl px-5 py-4 mb-5 flex flex-col gap-3"
+          className="rounded-xl px-4 py-3 mb-3 flex flex-col gap-2"
           style={{
             background: "rgba(255,255,255,0.03)",
             border: "1px solid rgba(255,255,255,0.07)",
@@ -468,17 +693,21 @@ export default function CarSelectScreen() {
           )}
         </div>
 
-        {/* ── COLOR PICKER ──────────────────────────────────────────────────── */}
+        {/* Color picker */}
         <div
-          className="rounded-2xl px-5 py-4 mb-5"
+          className="rounded-xl px-4 py-2.5 mb-3"
           style={{
             background: "rgba(255,255,255,0.03)",
             border: "1px solid rgba(255,255,255,0.07)",
           }}
         >
           <p
-            className="font-display font-bold text-xs tracking-[0.2em] uppercase mb-3"
-            style={{ color: "#5A7A99" }}
+            className="font-display font-bold uppercase mb-2"
+            style={{
+              color: "#5A7A99",
+              fontSize: "0.58rem",
+              letterSpacing: "0.18em",
+            }}
           >
             PICK COLOR
           </p>
@@ -489,36 +718,40 @@ export default function CarSelectScreen() {
                 <button
                   key={c.value}
                   type="button"
-                  className="flex flex-col items-center gap-1.5 active:scale-90 transition-smooth"
+                  className="flex flex-col items-center gap-1 active:scale-90"
                   onClick={() => selectColor(c.value)}
                   data-ocid={`car_select.color_${c.label.toLowerCase()}`}
                   aria-label={c.label}
                 >
                   <div
-                    className="w-10 h-10 rounded-full relative"
+                    className="w-7 h-7 rounded-full relative"
                     style={{
                       background: c.hex,
                       border: isActive
-                        ? "3px solid #FFFFFF"
-                        : "3px solid transparent",
+                        ? "2.5px solid #FFF"
+                        : "2.5px solid transparent",
                       boxShadow: isActive
-                        ? `0 0 0 3px ${c.hex}44, 0 0 18px ${c.hex}`
-                        : `0 0 8px ${c.hex}55`,
+                        ? `0 0 0 2px ${c.hex}44,0 0 12px ${c.hex}`
+                        : `0 0 5px ${c.hex}44`,
                       transition: "all 0.2s",
                     }}
                   >
                     {isActive && (
                       <span
-                        className="absolute inset-0 flex items-center justify-center text-sm font-black"
-                        style={{ color: "#0D1B2A" }}
+                        className="absolute inset-0 flex items-center justify-center font-black"
+                        style={{ color: "#0D1B2A", fontSize: "0.75rem" }}
                       >
                         ✓
                       </span>
                     )}
                   </div>
                   <span
-                    className="font-display font-bold text-xs uppercase tracking-wider"
-                    style={{ color: isActive ? c.hex : "#3A5A78" }}
+                    style={{
+                      color: isActive ? c.hex : "#3A5A78",
+                      fontSize: "0.5rem",
+                      fontWeight: 700,
+                      letterSpacing: "0.05em",
+                    }}
                   >
                     {c.label}
                   </span>
@@ -527,43 +760,79 @@ export default function CarSelectScreen() {
             })}
           </div>
         </div>
+
+        {/* Lock notice */}
+        {!isUnlocked && (
+          <div
+            className="rounded-xl px-4 py-2.5 mb-3 flex items-center justify-center gap-2 badge-pop"
+            style={{
+              background: "rgba(255,215,0,0.08)",
+              border: "1px solid rgba(255,215,0,0.22)",
+            }}
+            data-ocid="car_select.lock_info"
+          >
+            <span style={{ color: "#FFD700" }}>🔒</span>
+            <span
+              className="font-display font-bold text-xs"
+              style={{ color: "#FFD700" }}
+            >
+              Reach Level {car.unlockLevel} to unlock{" "}
+              <span style={{ color: "#FFFFFF55" }}>
+                ({xpForLevel(car.unlockLevel).toLocaleString()} XP)
+              </span>
+            </span>
+          </div>
+        )}
       </div>
 
-      {/* ── ACTION BUTTON — sticky at bottom ──────────────────────────────── */}
+      {/* Equip button */}
       <div
-        className="relative z-10 px-5 pb-6 pt-3 shrink-0"
+        className="px-4 pt-2 shrink-0"
         style={{
-          paddingBottom: "max(24px, env(safe-area-inset-bottom))",
-          background: "linear-gradient(to top, #0D1B2A 80%, transparent)",
+          paddingBottom: "max(20px,env(safe-area-inset-bottom))",
+          background: "linear-gradient(to top,#0D1B2A 70%,transparent)",
           borderTop: "1px solid rgba(255,255,255,0.06)",
         }}
       >
         <button
           type="button"
-          className="w-full py-5 rounded-2xl font-display font-black text-lg tracking-[0.15em] uppercase active:scale-95 transition-smooth"
-          style={{
-            ...btnStyle,
-            fontSize: "1.1rem",
-            transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.1s",
+          disabled={!isUnlocked}
+          className="w-full py-4 rounded-2xl font-display font-black text-base tracking-[0.1em] uppercase active:scale-95"
+          style={
+            isEquipped
+              ? {
+                  background: "linear-gradient(135deg,#00D4AA,#00AA88)",
+                  color: "#0D1B2A",
+                  boxShadow: "0 0 22px #00D4AA44",
+                }
+              : isUnlocked
+                ? {
+                    background: "linear-gradient(135deg,#FF6B2B,#FF9F1C)",
+                    color: "#0D1B2A",
+                    boxShadow: "0 0 22px #FF6B2B44",
+                  }
+                : {
+                    background: "#131E2E",
+                    color: "#4A6A8A",
+                    border: "1.5px solid #243050",
+                    cursor: "not-allowed",
+                  }
+          }
+          onClick={() => {
+            if (isUnlocked) {
+              selectCar(car.type as CarType);
+              navigate({ to: "/menu" });
+            }
           }}
-          onClick={handleConfirm}
           data-ocid="car_select.confirm_button"
         >
           {isEquipped
             ? "✓ EQUIPPED"
             : isUnlocked
-              ? "SELECT CAR →"
-              : `🔒 UNLOCK — 🪙 ${car.unlockCost.toLocaleString()}`}
+              ? "EQUIP CAR →"
+              : `🔒 Unlock at Level ${car.unlockLevel}`}
         </button>
       </div>
     </div>
   );
-}
-
-// ── Utils ─────────────────────────────────────────────────────────────────────
-function hexToRgb(hex: string): string {
-  const r = Number.parseInt(hex.slice(1, 3), 16);
-  const g = Number.parseInt(hex.slice(3, 5), 16);
-  const b = Number.parseInt(hex.slice(5, 7), 16);
-  return `${r},${g},${b}`;
 }

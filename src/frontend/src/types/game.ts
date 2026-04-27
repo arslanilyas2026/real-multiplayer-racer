@@ -6,6 +6,7 @@ export enum CarType {
   STREET = "STREET",
   JET = "JET",
   RACE = "RACE",
+  SUPER = "SUPER",
   HYPER = "HYPER",
   LIGHTNING = "LIGHTNING",
 }
@@ -39,6 +40,22 @@ export enum CarColor {
   NEON_CYAN = "#00D4AA",
   NEON_PURPLE = "#B44FFF",
   NEON_YELLOW = "#FFD700",
+}
+
+// ── XP Level Thresholds ───────────────────────────────────────────────────────
+// Index 0 = Level 1, Index 1 = Level 2, etc.
+export const XP_LEVEL_THRESHOLDS = [
+  0, 1000, 2000, 3500, 5000, 7000, 9500, 12500,
+] as const;
+
+/** Returns 1-indexed level for a given XP amount. */
+export function xpToLevel(xp: number): number {
+  let level = 1;
+  for (let i = 0; i < XP_LEVEL_THRESHOLDS.length; i++) {
+    if (xp >= XP_LEVEL_THRESHOLDS[i]) level = i + 1;
+    else break;
+  }
+  return level;
 }
 
 // ── Interfaces ────────────────────────────────────────────────────────────────
@@ -86,9 +103,15 @@ export interface PlayerProfile {
   selectedColor: CarColor;
   unlockedCars: CarType[];
   unlockedMaps: MapTheme[];
-  powerUpLevels: Record<PowerUpType, number>; // level 0–3
+  powerUpLevels: Record<PowerUpType, number>; // level 0–5
   highScore: number;
   totalRaces: number;
+}
+
+/** Shown when the player levels up mid-session. Cleared by dismissLevelUp(). */
+export interface LevelUpEvent {
+  newLevel: number;
+  unlockedCar: CarType | null; // which car just became available, if any
 }
 
 export interface RaceResult {

@@ -1,4 +1,4 @@
-import { P as PowerUpType } from "./gameStore-5oklP8TG.js";
+import { P as PowerUpType } from "./gameStore-sCxKMV8R.js";
 const POWER_UP_CATALOG = [
   {
     type: PowerUpType.SHIELD,

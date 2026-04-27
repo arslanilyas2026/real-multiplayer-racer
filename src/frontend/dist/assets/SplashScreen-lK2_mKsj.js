@@ -1,4 +1,4 @@
-import { u as useNavigate, r as reactExports, j as jsxRuntimeExports } from "./index-C9nsfCGx.js";
+import { u as useNavigate, r as reactExports, j as jsxRuntimeExports } from "./index-B6JfqekL.js";
 const LANE_MARKS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
 function RoadBackground() {
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "absolute inset-0 overflow-hidden pointer-events-none", children: [
@@ -291,11 +291,11 @@ function SplashScreen() {
                   letterSpacing: "0.04em"
                 },
                 children: [
-                  "REAL",
+                  "LANE RACER:",
                   /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}),
-                  "MULTIPLAYER",
+                  "CAR RACING",
                   /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}),
-                  "RACER"
+                  "CLASH"
                 ]
               }
             )

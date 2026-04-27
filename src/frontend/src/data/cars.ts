@@ -16,7 +16,8 @@ export interface CarData {
     acceleration: number; // 1–10
     maxFuel: number;
   };
-  unlockCost: number; // 0 = free / starter
+  /** Level required to unlock. Level 1 = free (BASIC). */
+  unlockLevel: number;
   emoji: string; // placeholder icon
   colors: CarColorOption[];
 }
@@ -34,7 +35,7 @@ export const CAR_CATALOG: CarData[] = [
     displayName: "BASIC",
     description: "Reliable starter. Easy to handle.",
     stats: { speed: 4, handling: 5, acceleration: 5, maxFuel: 100 },
-    unlockCost: 0,
+    unlockLevel: 1, // default — always unlocked
     emoji: "🚗",
     colors: SHARED_COLORS,
   },
@@ -43,7 +44,7 @@ export const CAR_CATALOG: CarData[] = [
     displayName: "SPORT",
     description: "Nimble and quick. Great for tight lanes.",
     stats: { speed: 6, handling: 7, acceleration: 7, maxFuel: 90 },
-    unlockCost: 500,
+    unlockLevel: 2, // XP 1,000
     emoji: "🏎️",
     colors: SHARED_COLORS,
   },
@@ -52,7 +53,7 @@ export const CAR_CATALOG: CarData[] = [
     displayName: "STREET",
     description: "Low and wide. Powerful acceleration.",
     stats: { speed: 7, handling: 6, acceleration: 8, maxFuel: 85 },
-    unlockCost: 1000,
+    unlockLevel: 3, // XP 2,000
     emoji: "🚙",
     colors: SHARED_COLORS,
   },
@@ -61,7 +62,7 @@ export const CAR_CATALOG: CarData[] = [
     displayName: "JET",
     description: "Turbocharged beast. Hard to tame.",
     stats: { speed: 8, handling: 5, acceleration: 9, maxFuel: 80 },
-    unlockCost: 2500,
+    unlockLevel: 4, // XP 3,500
     emoji: "✈️",
     colors: SHARED_COLORS,
   },
@@ -70,8 +71,17 @@ export const CAR_CATALOG: CarData[] = [
     displayName: "RACE",
     description: "Track-tuned precision machine.",
     stats: { speed: 9, handling: 8, acceleration: 8, maxFuel: 75 },
-    unlockCost: 5000,
+    unlockLevel: 5, // XP 5,000
     emoji: "🏁",
+    colors: SHARED_COLORS,
+  },
+  {
+    type: CarType.SUPER,
+    displayName: "SUPER",
+    description: "Supercar pedigree. Raw, relentless power.",
+    stats: { speed: 9, handling: 9, acceleration: 9, maxFuel: 72 },
+    unlockLevel: 6, // XP 7,000
+    emoji: "🚀",
     colors: SHARED_COLORS,
   },
   {
@@ -79,7 +89,7 @@ export const CAR_CATALOG: CarData[] = [
     displayName: "HYPER",
     description: "Blistering top speed. Elite pilot only.",
     stats: { speed: 10, handling: 7, acceleration: 9, maxFuel: 70 },
-    unlockCost: 10000,
+    unlockLevel: 7, // XP 9,500
     emoji: "⚡",
     colors: SHARED_COLORS,
   },
@@ -88,7 +98,7 @@ export const CAR_CATALOG: CarData[] = [
     displayName: "LIGHTNING",
     description: "The apex. Fastest machine on the road.",
     stats: { speed: 10, handling: 10, acceleration: 10, maxFuel: 65 },
-    unlockCost: 25000,
+    unlockLevel: 8, // XP 12,500
     emoji: "🌩️",
     colors: SHARED_COLORS,
   },

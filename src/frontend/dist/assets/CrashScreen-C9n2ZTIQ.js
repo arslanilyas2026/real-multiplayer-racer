@@ -1,5 +1,5 @@
-import { u as useNavigate, r as reactExports, j as jsxRuntimeExports } from "./index-C9nsfCGx.js";
-import { u as useGameStore } from "./gameStore-5oklP8TG.js";
+import { u as useNavigate, r as reactExports, j as jsxRuntimeExports } from "./index-B6JfqekL.js";
+import { u as useGameStore } from "./gameStore-sCxKMV8R.js";
 function CrashScreen() {
   const navigate = useNavigate();
   const { gameState, startGame } = useGameStore();

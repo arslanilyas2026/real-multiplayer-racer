@@ -1,6 +1,6 @@
-import { u as useNavigate, j as jsxRuntimeExports } from "./index-C9nsfCGx.js";
-import { g as getCarData } from "./cars-BYK3CU46.js";
-import { u as useGameStore } from "./gameStore-5oklP8TG.js";
+import { u as useNavigate, j as jsxRuntimeExports } from "./index-B6JfqekL.js";
+import { g as getCarData } from "./cars-BBAU-OP8.js";
+import { u as useGameStore } from "./gameStore-sCxKMV8R.js";
 function NavCard({ label, icon, color, to, ocid }) {
   const navigate = useNavigate();
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(
@@ -32,7 +32,7 @@ function MenuScreen() {
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(
     "div",
     {
-      className: "fixed inset-0 flex flex-col overflow-hidden bg-stripe-overlay",
+      className: "fixed inset-0 flex flex-col overflow-hidden",
       style: { background: "#0D1B2A" },
       "data-ocid": "menu.page",
       children: [
@@ -48,17 +48,7 @@ function MenuScreen() {
         }
         .play-btn-glow { animation: play-glow 2s ease-in-out infinite; }
       ` }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "div",
-          {
-            className: "absolute inset-0 pointer-events-none",
-            style: {
-              backgroundImage: "repeating-linear-gradient(45deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 2px, transparent 2px, transparent 28px)",
-              zIndex: 0
-            }
-          }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative z-10 flex flex-col h-full px-5", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col h-full px-5", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col items-center pt-14 pb-3", children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx(
               "p",
@@ -77,7 +67,7 @@ function MenuScreen() {
                   color: "#FF6B2B",
                   letterSpacing: "0.04em"
                 },
-                children: "REAL MULTIPLAYER RACER"
+                children: "LANE RACER: CAR RACING CLASH"
               }
             )
           ] }),
@@ -272,18 +262,7 @@ function MenuScreen() {
             /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs", style: { color: "#FFFFFF22" }, children: [
               "© ",
               (/* @__PURE__ */ new Date()).getFullYear(),
-              ". Built with love using",
-              " ",
-              /* @__PURE__ */ jsxRuntimeExports.jsx(
-                "a",
-                {
-                  href: `https://caffeine.ai?utm_source=caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname)}`,
-                  target: "_blank",
-                  rel: "noreferrer",
-                  style: { color: "#FF6B2B55", textDecoration: "underline" },
-                  children: "caffeine.ai"
-                }
-              )
+              ". Developed by Wevo Soft"
             ] })
           ] })
         ] })

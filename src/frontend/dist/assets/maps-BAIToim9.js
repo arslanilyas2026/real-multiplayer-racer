@@ -1,4 +1,4 @@
-import { M as MapTheme } from "./gameStore-5oklP8TG.js";
+import { M as MapTheme } from "./gameStore-sCxKMV8R.js";
 const MAP_CATALOG = [
   {
     theme: MapTheme.HIGHWAY,
@@ -13,6 +13,7 @@ const MAP_CATALOG = [
     ambientColor: "#00D4AA",
     icon: "🛣️",
     unlockThreshold: 0,
+    unlockLevel: 0,
     trafficColors: ["#00D4AA", "#FF6B2B", "#B44FFF", "#FFD700", "#4FC3F7"],
     bgLeft: "#0D1B2A",
     bgRight: "#0D1B2A"
@@ -30,6 +31,7 @@ const MAP_CATALOG = [
     ambientColor: "#B44FFF",
     icon: "🏙️",
     unlockThreshold: 0,
+    unlockLevel: 0,
     trafficColors: ["#B44FFF", "#4FC3F7", "#FF6B2B", "#FFFFFF", "#FFD700"],
     bgLeft: "#1A2240",
     bgRight: "#1A2240"
@@ -47,6 +49,7 @@ const MAP_CATALOG = [
     ambientColor: "#FF6B2B",
     icon: "🏜️",
     unlockThreshold: 0,
+    unlockLevel: 0,
     trafficColors: ["#FF6B2B", "#CC4400", "#884400", "#FFAA00", "#FF3300"],
     bgLeft: "#1C1208",
     bgRight: "#1C1208"
@@ -64,6 +67,7 @@ const MAP_CATALOG = [
     ambientColor: "#FF8C00",
     icon: "🌆",
     unlockThreshold: 1500,
+    unlockLevel: 3,
     trafficColors: ["#FF4400", "#FF8800", "#FFAA00", "#FF6633", "#CC3300"],
     bgLeft: "linear-gradient(180deg, #FF6B35 0%, #FF4488 50%, #8B44FF 100%)",
     bgRight: "linear-gradient(180deg, #FF6B35 0%, #FF4488 50%, #8B44FF 100%)"
@@ -81,6 +85,7 @@ const MAP_CATALOG = [
     ambientColor: "#4FC3F7",
     icon: "🌧️",
     unlockThreshold: 3e3,
+    unlockLevel: 5,
     trafficColors: ["#1a2040", "#111122", "#222244", "#0a0a30", "#1a1a3a"],
     bgLeft: "linear-gradient(180deg, #0a0a1a 0%, #111128 50%, #0d0d20 100%)",
     bgRight: "linear-gradient(180deg, #0a0a1a 0%, #111128 50%, #0d0d20 100%)"
@@ -98,6 +103,7 @@ const MAP_CATALOG = [
     ambientColor: "#90A0A0",
     icon: "🏔️",
     unlockThreshold: 4500,
+    unlockLevel: 7,
     trafficColors: ["#2d5a27", "#5c3d1e", "#6b2d2d", "#3d4a2d", "#4a3520"],
     bgLeft: "linear-gradient(180deg, #708090 0%, #4a5a4a 50%, #3a4a3a 100%)",
     bgRight: "linear-gradient(180deg, #708090 0%, #4a5a4a 50%, #3a4a3a 100%)"
